@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+    <!-- These three lines make it installable as a home screen app on iPhone -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Voice Cal">
+
+    <title>Voice Calendar</title>
+    <style>
+        /* ── Reset & base ───────────────────────────────────────── */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            /* -apple-system uses the native iOS font (San Francisco) */
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f2f2f7;   /* iOS system background color */
+            min-height: 100vh;
+            padding: env(safe-area-inset-top, 20px) 16px 40px;
+            color: #1c1c1e;
+        }
+
+        .container { max-width: 480px; margin: 0 auto; padding-top: 16px; }
+
+        h1 { font-size: 28px; font-weight: 700; }
+
+        .subtitle { font-size: 15px; color: #8e8e93; margin: 4px 0 24px; }
+
+        /* ── Cards (white rounded boxes) ───────────────────────── */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+        }
+
+        .section-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #8e8e93;
+            margin-bottom: 10px;
+        }
+
+        /* ── Password field ────────────────────────────────────── */
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="password"] {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 17px;
+            font-family: inherit;
+            color: #1c1c1e;
+            background: transparent;
+            padding: 2px 0;
+        }
+
+        input[type="password"]::placeholder { color: #c7c7cc; }
+
+        /* ── Text area ─────────────────────────────────────────── */
+        textarea {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 17px;
+            font-family: inherit;
+            color: #1c1c1e;
+            resize: none;
+            min-height: 80px;
+            background: transparent;
+            line-height: 1.5;
+        }
+
+        textarea::placeholder { color: #c7c7cc; }
+
+        /* ── Record button ─────────────────────────────────────── */
+        .record-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0 8px;
+        }
+
+        .record-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #ff3b30;
+            border: none;
+            cursor: pointer;
+            font-size: 32px;
+            box-shadow: 0 4px 16px rgba(255,59,48,0.35);
+            transition: transform 0.1s;
+            -webkit-tap-highlight-color: transparent;
+            /* Prevent accidental text selection on long press */
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .record-btn:active { transform: scale(0.93); }
+
+        /* Pulse animation while recording */
+        .record-btn.recording {
+            animation: pulse 1.4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 4px 16px rgba(255,59,48,0.35); }
+            50%       { box-shadow: 0 4px 40px rgba(255,59,48,0.65); transform: scale(1.06); }
+        }
+
+        .record-label {
+            margin-top: 12px;
+            font-size: 14px;
+            color: #8e8e93;
+        }
+
+        .or-divider {
+            text-align: center;
+            font-size: 12px;
+            color: #c7c7cc;
+            font-weight: 600;
+            margin: 16px 0 12px;
+        }
+
+        /* ── Submit button ─────────────────────────────────────── */
+        .submit-btn {
+            width: 100%;
+            padding: 17px;
+            background: #007aff;
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            margin-bottom: 12px;
+            -webkit-tap-highlight-color: transparent;
+            transition: opacity 0.15s;
+        }
+
+        .submit-btn:active { opacity: 0.75; }
+        .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* ── Loading spinner ───────────────────────────────────── */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #8e8e93;
+            font-size: 15px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 18px; height: 18px;
+            border: 2px solid #e5e5ea;
+            border-top-color: #007aff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Results ───────────────────────────────────────────── */
+        .transcript-box {
+            font-size: 14px;
+            color: #636366;
+            font-style: italic;
+            background: #f9f9fb;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .result-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f2f2f7;
+        }
+
+        .result-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .result-item:first-child { padding-top: 0; }
+
+        .result-icon {
+            width: 38px; height: 38px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .result-icon.event { background: #e8f0fe; }
+        .result-icon.task  { background: #fef3e2; }
+
+        .result-title  { font-size: 16px; font-weight: 600; line-height: 1.3; }
+        .result-detail { font-size: 13px; color: #8e8e93; margin-top: 2px; }
+
+        /* ── Error ─────────────────────────────────────────────── */
+        .error-card {
+            background: #fff2f2;
+            border-radius: 14px;
+            padding: 16px;
+            color: #d93025;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>Voice Calendar</h1>
+    <p class="subtitle">Speak or type — events go straight to your calendar</p>
+
+    <!-- ── Password card ─────────────────────────────────────────── -->
+    <div class="card" id="authCard">
+        <p class="section-label">Password</p>
+        <div class="input-row">
+            <input type="password" id="secretInput"
+                   placeholder="Enter your app password"
+                   autocomplete="current-password">
+            <span id="lockIcon">🔒</span>
+        </div>
+    </div>
+
+    <!-- ── Input card (record + text) ───────────────────────────── -->
+    <div class="card">
+        <!-- Voice recording -->
+        <div class="record-section">
+            <button class="record-btn" id="recordBtn" onclick="toggleRecord()">🎤</button>
+            <div class="record-label" id="recordLabel">Tap to record</div>
+        </div>
+
+        <div class="or-divider">— or type below —</div>
+
+        <p class="section-label">Your message</p>
+        <textarea id="textInput" rows="3"
+            placeholder="e.g. Dentist Thursday 2pm, team standup every Monday 9am at the office…"
+        ></textarea>
+    </div>
+
+    <!-- ── Submit button ─────────────────────────────────────────── -->
+    <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">
+        Add to Calendar →
+    </button>
+
+    <!-- ── Loading ───────────────────────────────────────────────── -->
+    <div class="hidden card loading" id="loadingEl">
+        <span class="spinner"></span> Processing…
+    </div>
+
+    <!-- ── Results ───────────────────────────────────────────────── -->
+    <div class="hidden" id="resultsEl"></div>
+
+</div>
+
+<script>
+// ── State ────────────────────────────────────────────────────────────────
+let mediaRecorder = null;
+let audioChunks   = [];
+let isRecording   = false;
+let recordedBlob  = null;
+let recordedMime  = '';
+
+// ── Persist password in localStorage so user doesn't retype each visit ──
+window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('vcal_secret');
+    if (saved) document.getElementById('secretInput').value = saved;
+});
+
+document.getElementById('secretInput').addEventListener('change', () => {
+    localStorage.setItem('vcal_secret', document.getElementById('secretInput').value);
+    document.getElementById('lockIcon').textContent = '🔓';
+});
+
+// ── Recording ────────────────────────────────────────────────────────────
+async function toggleRecord() {
+    if (isRecording) {
+        stopRecording();
+    } else {
+        await startRecording();
+    }
+}
+
+async function startRecording() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        // iOS Safari records as audio/mp4; Chrome/Firefox use audio/webm
+        // We try formats in order of preference
+        const mimeType =
+            MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' :
+            MediaRecorder.isTypeSupported('audio/webm')              ? 'audio/webm'              :
+            'audio/mp4';
+
+        mediaRecorder = new MediaRecorder(stream, { mimeType });
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = (e) => {
+            if (e.data.size > 0) audioChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+            recordedMime = mimeType;
+            recordedBlob = new Blob(audioChunks, { type: mimeType });
+            stream.getTracks().forEach(t => t.stop());  // release the microphone
+            onRecordingReady();
+        };
+
+        mediaRecorder.start(200);  // emit data every 200ms (required on some browsers)
+        isRecording = true;
+        setRecordUI(true);
+
+    } catch (err) {
+        // This happens if the user denies microphone permission
+        alert('Microphone access was denied.\n\nTo fix: go to your browser settings and allow microphone access for this site, then refresh.');
+    }
+}
+
+function stopRecording() {
+    if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+    }
+}
+
+function setRecordUI(recording) {
+    const btn   = document.getElementById('recordBtn');
+    const label = document.getElementById('recordLabel');
+    if (recording) {
+        btn.classList.add('recording');
+        btn.textContent = '⏹';
+        label.textContent = 'Recording… tap to stop';
+    } else {
+        btn.classList.remove('recording');
+        btn.textContent = '🎤';
+    }
+}
+
+function onRecordingReady() {
+    setRecordUI(false);
+    document.getElementById('recordLabel').textContent = '✓ Recording ready — tap Add to Calendar';
+    document.getElementById('textInput').value = '';
+    document.getElementById('textInput').placeholder = '';
+}
+
+// ── Submit ───────────────────────────────────────────────────────────────
+async function handleSubmit() {
+    const text   = document.getElementById('textInput').value.trim();
+    const secret = document.getElementById('secretInput').value.trim();
+
+    if (!text && !recordedBlob) {
+        alert('Please record a voice note or type a message first.');
+        return;
+    }
+
+    setLoading(true);
+    clearResults();
+
+    try {
+        const formData = new FormData();
+
+        if (recordedBlob) {
+            // Pick the right file extension based on what the browser recorded
+            const ext = recordedMime.includes('mp4') ? 'm4a' : 'webm';
+            formData.append('audio', recordedBlob, `recording.${ext}`);
+        } else {
+            formData.append('text', text);
+        }
+
+        // Send the user's timezone so the AI resolves "tomorrow" correctly
+        // Intl.DateTimeFormat().resolvedOptions().timeZone returns e.g. "America/New_York"
+        formData.append('timezone', Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+        // Send the password to the server for verification
+        if (secret) formData.append('secret', secret);
+
+        const res  = await fetch('/parse', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (!res.ok || data.error) throw new Error(data.error || 'Unknown error');
+
+        renderResults(data);
+
+        // Reset input state after successful submission
+        recordedBlob = null;
+        document.getElementById('textInput').value = '';
+        document.getElementById('recordLabel').textContent = 'Tap to record';
+        document.getElementById('textInput').placeholder =
+            'e.g. Dentist Thursday 2pm, team standup every Monday 9am at the office…';
+
+    } catch (err) {
+        renderError(err.message);
+    } finally {
+        setLoading(false);
+    }
+}
+
+// ── Rendering ────────────────────────────────────────────────────────────
+function setLoading(show) {
+    document.getElementById('loadingEl').classList.toggle('hidden', !show);
+    document.getElementById('submitBtn').disabled = show;
+}
+
+function clearResults() {
+    const el = document.getElementById('resultsEl');
+    el.innerHTML = '';
+    el.classList.add('hidden');
+}
+
+function renderResults(data) {
+    const el = document.getElementById('resultsEl');
+    el.classList.remove('hidden');
+
+    let html = '';
+
+    // If it was a voice note, show what was heard
+    if (data.transcript) {
+        html += `<div class="transcript-box">"${esc(data.transcript)}"</div>`;
+    }
+
+    if (!data.created || data.created.length === 0) {
+        html += `<div class="card" style="text-align:center;color:#8e8e93;padding:24px">
+                   No events or tasks found.<br>
+                   <small>Try including a specific date or time.</small>
+                 </div>`;
+    } else {
+        html += '<div class="card">';
+        for (const item of data.created) {
+            const isEvent = item.type === 'event';
+            const icon    = isEvent ? '📅' : '📋';
+            const cls     = isEvent ? 'event' : 'task';
+
+            let detail = '';
+            if (isEvent) {
+                if (item.date)     detail += item.date;
+                if (item.time)     detail += ` · ${item.time}`;
+                if (item.location) detail += ` · ${esc(item.location)}`;
+            } else {
+                detail = item.deadline ? `Due ${item.deadline}` : 'Added to calendar';
+            }
+
+            html += `
+              <div class="result-item">
+                <div class="result-icon ${cls}">${icon}</div>
+                <div>
+                  <div class="result-title">${esc(item.title)}</div>
+                  <div class="result-detail">${detail}</div>
+                </div>
+              </div>`;
+        }
+        html += '</div>';
+    }
+
+    el.innerHTML = html;
+}
+
+function renderError(message) {
+    const el = document.getElementById('resultsEl');
+    el.classList.remove('hidden');
+    el.innerHTML = `<div class="error-card">⚠ ${esc(message)}</div>`;
+}
+
+// Prevent XSS: escape any user-originated text before inserting into HTML
+function esc(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>

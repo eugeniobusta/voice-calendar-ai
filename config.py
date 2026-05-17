@@ -23,11 +23,34 @@ load_dotenv()
 
 class Config:
     def __init__(self):
+        # ── Groq (AI parsing + cloud transcription) ────────────────────────
         self.groq_api_key = os.getenv("GROQ_API_KEY", "")
-        self.groq_model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+        self.groq_model   = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+
+        # ── Local Whisper (CLI only) ───────────────────────────────────────
         self.whisper_model = os.getenv("WHISPER_MODEL", "base")
+
+        # ── Apple Calendar (CLI / Mac only) ───────────────────────────────
         self.calendar_name = os.getenv("CALENDAR_NAME", "Home")
+
+        # ── Storage ───────────────────────────────────────────────────────
         self.db_path = os.getenv("DB_PATH", "data/events.db")
+
+        # ── Web app ───────────────────────────────────────────────────────
+        # Password to protect your web app from strangers
+        self.app_secret = os.getenv("APP_SECRET", "")
+
+        # Your timezone — events are created in this zone
+        # Find yours at: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+        # Examples: America/New_York, America/Los_Angeles, Europe/London, Europe/Rome
+        self.timezone = os.getenv("TIMEZONE", "America/New_York")
+
+        # ── Google Calendar (web app only) ────────────────────────────────
+        # These come from setup_google_auth.py — run it once on your Mac
+        self.google_client_id      = os.getenv("GOOGLE_CLIENT_ID", "")
+        self.google_client_secret  = os.getenv("GOOGLE_CLIENT_SECRET", "")
+        self.google_refresh_token  = os.getenv("GOOGLE_REFRESH_TOKEN", "")
+
         self._validate()
 
     def _validate(self):
@@ -41,3 +64,5 @@ class Config:
                 "  3. Copy the key and paste it into your .env file as:\n"
                 "     GROQ_API_KEY=gsk_...\n"
             )
+        # Google Calendar credentials are only checked when GoogleCalendarWriter is used,
+        # so we don't validate them here (CLI mode doesn't need them)

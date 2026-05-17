@@ -3,3 +3,12 @@ openai-whisper>=20231117
 pydantic>=2.0.0
 python-dotenv>=1.0.0
 pytest>=7.4.0
+
+# Web app
+flask>=3.0.0
+gunicorn>=21.0.0
+
+# Google Calendar API
+google-api-python-client>=2.100.0
+google-auth-oauthlib>=1.1.0
+google-auth-httplib2>=0.2.0
