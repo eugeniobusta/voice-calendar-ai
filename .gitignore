@@ -1,0 +1,27 @@
+# Python bytecode — generated automatically, never commit these
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment — each developer creates their own
+venv/
+.venv/
+env/
+
+# ⚠ NEVER commit this — it contains your secret API keys
+.env
+
+# Local data and logs — personal to your machine
+data/
+
+# macOS system files
+.DS_Store
+
+# IDE configuration
+.idea/
+.vscode/
+
+# Test output
+.pytest_cache/
+.coverage
+htmlcov/

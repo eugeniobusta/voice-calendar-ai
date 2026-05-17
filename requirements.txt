@@ -1,0 +1,5 @@
+groq>=0.13.0
+openai-whisper>=20231117
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+pytest>=7.4.0
