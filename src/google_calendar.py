@@ -36,7 +36,8 @@ TASKS AS ALL-DAY EVENTS:
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
-from datetime import date as date_type, timedelta
+from datetime import date as date_type, datetime, timedelta
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from .validator import Event, Task
 
 
@@ -132,6 +133,56 @@ class GoogleCalendarWriter:
         }
 
         self.service.events().insert(calendarId="primary", body=body).execute()
+
+    def get_today_events(self, timezone_str: str = "UTC") -> list:
+        """Returns today's events from the primary Google Calendar."""
+        try:
+            tz = ZoneInfo(timezone_str)
+        except (ZoneInfoNotFoundError, Exception):
+            tz = ZoneInfo("UTC")
+
+        now   = datetime.now(tz)
+        start = now.replace(hour=0,  minute=0,  second=0,  microsecond=0)
+        end   = now.replace(hour=23, minute=59, second=59, microsecond=0)
+
+        result = self.service.events().list(
+            calendarId="primary",
+            timeMin=start.isoformat(),
+            timeMax=end.isoformat(),
+            singleEvents=True,
+            orderBy="startTime",
+            maxResults=15,
+        ).execute()
+
+        events = []
+        for e in result.get("items", []):
+            start_raw = e["start"].get("dateTime", e["start"].get("date", ""))
+            time_str  = ""
+            if "T" in start_raw:
+                try:
+                    dt = datetime.fromisoformat(start_raw)
+                    time_str = dt.strftime("%H:%M")
+                except Exception:
+                    pass
+            events.append({
+                "title":  e.get("summary", "Untitled"),
+                "time":   time_str,
+                "allDay": "date" in e["start"],
+            })
+        return events
+
+    def list_google_calendars(self) -> list:
+        """Returns all calendars in the user's Google account with colors."""
+        result = self.service.calendarList().list().execute()
+        return [
+            {
+                "id":      c["id"],
+                "name":    c["summary"],
+                "color":   c.get("backgroundColor", "#0D9488"),
+                "primary": c.get("primary", False),
+            }
+            for c in result.get("items", [])
+        ]
 
     def _add_hour(self, time_str: str) -> str:
         """Adds 1 hour to a HH:MM string."""

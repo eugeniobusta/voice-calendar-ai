@@ -10,8 +10,10 @@ DEPLOYMENT:
   Locally:    python app.py     (runs on http://localhost:5001)
   Production: gunicorn app:app  (Render calls this via the Procfile)
 """
+import csv
+import io
 import os
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, make_response
 from config import Config
 from src.parser import Parser
 from src.validator import validate_events
@@ -94,9 +96,10 @@ def parse():
         return jsonify({"error": "Send either 'text' or 'audio'"}), 400
 
     # ── Step 2: Parse with Groq AI ─────────────────────────────────────────
+    default_reminder = int(request.form.get("default_reminder", 30))
     try:
         parser = Parser(config=config)
-        raw    = parser.parse(text)
+        raw    = parser.parse(text, default_reminder=default_reminder)
         data   = validate_events(raw)
     except Exception as e:
         return jsonify({"error": f"AI parsing failed: {e}"}), 500
@@ -137,6 +140,37 @@ def parse():
     return jsonify({"transcript": text, "created": created})
 
 
+@app.route("/today", methods=["GET"])
+def today():
+    """Returns today's events from Google Calendar for the preview card."""
+    config = Config()
+    if config.app_secret and request.args.get("secret", "") != config.app_secret:
+        return jsonify([]), 401
+    if not config.google_refresh_token:
+        return jsonify([])
+    try:
+        tz = request.args.get("timezone", config.timezone)
+        writer = GoogleCalendarWriter(config, timezone=tz)
+        return jsonify(writer.get_today_events(tz))
+    except Exception:
+        return jsonify([])
+
+
+@app.route("/calendars", methods=["GET"])
+def calendars():
+    """Returns the user's Google Calendar list with colors."""
+    config = Config()
+    if config.app_secret and request.args.get("secret", "") != config.app_secret:
+        return jsonify([]), 401
+    if not config.google_refresh_token:
+        return jsonify([])
+    try:
+        writer = GoogleCalendarWriter(config)
+        return jsonify(writer.list_google_calendars())
+    except Exception:
+        return jsonify([])
+
+
 @app.route("/history", methods=["GET"])
 def history():
     """Returns recent event history for the web app history tab."""
@@ -146,6 +180,42 @@ def history():
             return jsonify({"error": "Unauthorized"}), 401
     rows = Storage(config.db_path).get_history_for_api()
     return jsonify(rows)
+
+
+@app.route("/history", methods=["DELETE"])
+def delete_history():
+    """Deletes one entry (id=X) or all entries (no id param)."""
+    config = Config()
+    if config.app_secret and request.args.get("secret", "") != config.app_secret:
+        return jsonify({"error": "Unauthorized"}), 401
+    storage = Storage(config.db_path)
+    entry_id = request.args.get("id")
+    if entry_id:
+        storage.delete_entry(int(entry_id))
+    else:
+        storage.delete_all()
+    return jsonify({"ok": True})
+
+
+@app.route("/history/export", methods=["GET"])
+def export_history():
+    """Downloads the full history as a CSV file."""
+    config = Config()
+    if config.app_secret and request.args.get("secret", "") != config.app_secret:
+        return jsonify({"error": "Unauthorized"}), 401
+    rows = Storage(config.db_path).get_history_for_api(limit=10000)
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["Created At", "Input", "Events", "Tasks", "Titles"])
+    for r in rows:
+        titles = ", ".join(
+            [e["title"] for e in r["events"]] + [t["title"] for t in r["tasks"]]
+        )
+        w.writerow([r["created_at"], r["input_text"], r["event_count"], r["task_count"], titles])
+    resp = make_response(buf.getvalue())
+    resp.headers["Content-Type"] = "text/csv"
+    resp.headers["Content-Disposition"] = "attachment; filename=voice-calendar-history.csv"
+    return resp
 
 
 @app.route("/telegram", methods=["POST"])

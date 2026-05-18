@@ -90,7 +90,7 @@ class Parser:
         self.ollama_host  = config.ollama_host
         self.ollama_model = config.ollama_model
 
-    def parse(self, text: str, calendars: list = None) -> dict:
+    def parse(self, text: str, calendars: list = None, default_reminder: int = 30) -> dict:
         """
         Parses natural language into structured event data.
 
@@ -107,12 +107,13 @@ class Parser:
         cal_list  = calendars or ["Personal"]
         cal_str   = ", ".join(cal_list)
 
-        # Inject today's date and available calendars into the prompt
+        # Inject today's date, calendars, and default reminder into the prompt
         system_prompt = (
             SYSTEM_PROMPT_BASE
             + f"\n\nAVAILABLE CALENDARS: {cal_str}"
             + f"\nChoose the most fitting calendar for each event."
             + f"\nIf unsure, use '{cal_list[0]}'."
+            + f"\nDefault reminder: [{default_reminder}] minutes before each event."
         )
 
         user_message = f"Today's date: {today}\n\nMessage to parse:\n{text}"

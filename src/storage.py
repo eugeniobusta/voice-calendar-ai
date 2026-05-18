@@ -98,19 +98,20 @@ class Storage:
     def get_history_for_api(self, limit: int = 30) -> list:
         """Returns recent entries as a list of dicts for the web history endpoint."""
         cursor = self.conn.execute(
-            """SELECT created_at, input_text, event_count, task_count, parsed_json
+            """SELECT id, created_at, input_text, event_count, task_count, parsed_json
                FROM entries ORDER BY id DESC LIMIT ?""",
             (limit,)
         )
         result = []
-        for created_at, input_text, event_count, task_count, parsed_json_str in cursor.fetchall():
+        for row_id, created_at, input_text, event_count, task_count, parsed_json_str in cursor.fetchall():
             try:
                 parsed = json.loads(parsed_json_str)
             except Exception:
                 parsed = {"events": [], "tasks": []}
             result.append({
-                "created_at": created_at,
-                "input_text": input_text[:120],
+                "id":          row_id,
+                "created_at":  created_at,
+                "input_text":  input_text[:120],
                 "event_count": event_count,
                 "task_count":  task_count,
                 "events": [
@@ -123,6 +124,16 @@ class Storage:
                 ],
             })
         return result
+
+    def delete_entry(self, entry_id: int):
+        """Deletes a single history entry by ID."""
+        self.conn.execute("DELETE FROM entries WHERE id = ?", (entry_id,))
+        self.conn.commit()
+
+    def delete_all(self):
+        """Clears the entire history table."""
+        self.conn.execute("DELETE FROM entries")
+        self.conn.commit()
 
     def show_history(self):
         """Prints a formatted table of recent entries to the terminal."""
