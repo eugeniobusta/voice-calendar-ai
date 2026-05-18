@@ -23,9 +23,21 @@ load_dotenv()
 
 class Config:
     def __init__(self):
-        # ── Groq (AI parsing + cloud transcription) ────────────────────────
+        # ── AI provider ───────────────────────────────────────────────────
+        # "groq"   → Groq cloud API (needs internet + GROQ_API_KEY)
+        # "ollama" → fully local LLM via Ollama (no internet, no key needed)
+        self.ai_provider = os.getenv("AI_PROVIDER", "groq")
+
+        # ── Groq (cloud AI) ───────────────────────────────────────────────
         self.groq_api_key = os.getenv("GROQ_API_KEY", "")
         self.groq_model   = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+
+        # ── Ollama (local AI) ─────────────────────────────────────────────
+        # Install: brew install ollama
+        # Pull:    ollama pull llama3.2
+        # Start:   ollama serve
+        self.ollama_model = os.getenv("OLLAMA_MODEL", "llama3.2")
+        self.ollama_host  = os.getenv("OLLAMA_HOST",  "http://localhost:11434")
 
         # ── Local Whisper (CLI only) ───────────────────────────────────────
         self.whisper_model = os.getenv("WHISPER_MODEL", "base")
@@ -60,14 +72,9 @@ class Config:
 
     def _validate(self):
         """Fails early with a helpful message if required config is missing."""
-        if not self.groq_api_key:
+        if self.ai_provider == "groq" and not self.groq_api_key:
             raise EnvironmentError(
                 "\n\n  GROQ_API_KEY is missing!\n"
-                "  Steps to fix:\n"
-                "  1. Go to https://console.groq.com and sign up (free, no credit card)\n"
-                "  2. Click 'API Keys' → 'Create API Key'\n"
-                "  3. Copy the key and paste it into your .env file as:\n"
-                "     GROQ_API_KEY=gsk_...\n"
+                "  Either add your Groq key, or switch to local mode:\n"
+                "  AI_PROVIDER=ollama  (then: brew install ollama && ollama pull llama3.2)\n"
             )
-        # Google Calendar credentials are only checked when GoogleCalendarWriter is used,
-        # so we don't validate them here (CLI mode doesn't need them)

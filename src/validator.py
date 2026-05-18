@@ -38,6 +38,7 @@ class Event(BaseModel):
     """Represents a single calendar event."""
 
     title: str
+    calendar: str = "Personal"         # which Apple Calendar to add to
     date: Optional[str] = None         # YYYY-MM-DD
     start_time: Optional[str] = None   # HH:MM in 24-hour format
     end_time: Optional[str] = None     # HH:MM in 24-hour format

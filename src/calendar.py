@@ -44,19 +44,43 @@ from .validator import Event, Task
 
 
 class CalendarWriter:
-    def __init__(self, calendar_name: str = "Home"):
+    def __init__(self, calendar_name: str = "Personal"):
         """
         Parameters:
-            calendar_name: must match a calendar name in your Calendar app exactly.
-                           Open Calendar and check the left sidebar.
+            calendar_name: default calendar when the AI doesn't specify one.
         """
         self.calendar_name = calendar_name
 
+    def list_calendars(self) -> list:
+        """
+        Returns all calendar names from the Apple Calendar app.
+
+        This lets the AI know which calendars exist so it can pick the right one.
+        AppleScript returns them as a comma-separated string like:
+          "Personal, Gym, Exams, Class, Work"
+        We split it into a Python list.
+        """
+        script = "tell application \"Calendar\" to return name of calendars"
+        result = subprocess.run(
+            ["osascript", "-e", script],
+            capture_output=True, text=True
+        )
+        if result.returncode != 0 or not result.stdout.strip():
+            return [self.calendar_name]
+        return [c.strip() for c in result.stdout.strip().split(",")]
+
     def create_event(self, event: Event):
-        """Creates a calendar event in Apple Calendar via AppleScript."""
+        """
+        Creates a calendar event in Apple Calendar via AppleScript.
+        Uses event.calendar to pick which calendar — AI decides this.
+        Falls back to self.calendar_name if not specified.
+        """
         if not event.date:
             print(f"    ⚠ Skipped '{event.title}' — no date could be determined")
             return
+
+        # AI picks the calendar; fall back to the default if missing
+        target_calendar = event.calendar or self.calendar_name
 
         year, month, day = event.date.split("-")
         start_h, start_m = (event.start_time or "09:00").split(":")
@@ -74,7 +98,7 @@ class CalendarWriter:
 
         script = f"""
 tell application "Calendar"
-    tell calendar "{self.calendar_name}"
+    tell calendar "{self._escape(target_calendar)}"
         -- Build start date by setting each numeric component individually.
         -- This avoids locale-dependent date string parsing issues.
         set start_date to current date

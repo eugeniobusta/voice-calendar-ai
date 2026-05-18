@@ -69,12 +69,19 @@ def main():
         print("Error: provide --text or --audio")
         sys.exit(1)
 
-    # ── Step 2: Parse text into structured JSON ────────────────────────────
-    print(f"[PARSING] Sending to Groq ({config.groq_model})...")
-    parser = Parser(api_key=config.groq_api_key, model=config.groq_model)
-    raw_output = parser.parse(text)
+    # ── Step 2: Read available Apple Calendars ────────────────────────────
+    writer = CalendarWriter(calendar_name=config.calendar_name)
+    calendars = writer.list_calendars()
+    if calendars:
+        print(f"[CALENDARS] Found: {', '.join(calendars)}\n")
 
-    # ── Step 3: Validate the structure ────────────────────────────────────
+    # ── Step 3: Parse text into structured JSON ────────────────────────────
+    provider_label = f"Ollama ({config.ollama_model})" if config.ai_provider == "ollama" else f"Groq ({config.groq_model})"
+    print(f"[PARSING] Sending to {provider_label}...")
+    parser = Parser(config=config)
+    raw_output = parser.parse(text, calendars=calendars)
+
+    # ── Step 4: Validate the structure ────────────────────────────────────
     print("[VALIDATING] Checking data structure...")
     data = validate_events(raw_output)
 
@@ -83,18 +90,16 @@ def main():
         print("  Try being more specific about dates and times.\n")
         return
 
-    # ── Step 4: Create calendar events and reminders ───────────────────────
+    # ── Step 5: Create calendar events and reminders ───────────────────────
     print(f"[CALENDAR] Creating {len(data.events)} event(s) and {len(data.tasks)} reminder(s)...\n")
-    writer = CalendarWriter(calendar_name=config.calendar_name)
 
     for event in data.events:
         try:
             writer.create_event(event)
             parts = [f"'{event.title}'"]
-            if event.date:
-                parts.append(f"on {event.date}")
-            if event.start_time:
-                parts.append(f"at {event.start_time}")
+            if event.date:       parts.append(f"on {event.date}")
+            if event.start_time: parts.append(f"at {event.start_time}")
+            parts.append(f"→ {event.calendar}")
             print(f"  ✓ Event: {' '.join(parts)}")
         except RuntimeError as e:
             print(f"  ✗ Failed: {e}")
@@ -107,7 +112,7 @@ def main():
         except RuntimeError as e:
             print(f"  ✗ Failed: {e}")
 
-    # ── Step 5: Log to database ────────────────────────────────────────────
+    # ── Step 6: Log to database ────────────────────────────────────────────
     storage.save(text, data)
 
     print(f"\n✓ Done! {len(data.events)} event(s) and {len(data.tasks)} reminder(s) created.")
