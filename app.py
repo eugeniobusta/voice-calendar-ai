@@ -140,22 +140,13 @@ def parse():
 def telegram_webhook():
     """
     Telegram calls this URL every time someone messages your bot.
-
-    HOW TELEGRAM WEBHOOKS WORK:
-      When you (or anyone) send a message to your Telegram bot,
-      Telegram makes a POST request to this URL with the message as JSON.
-      We process it and call the Telegram API to send a reply.
-      We always return HTTP 200 — if we return anything else,
-      Telegram thinks delivery failed and keeps retrying.
-
-    FLOW:
-      Telegram POST → parse update → transcribe (if voice) →
-      Groq AI → Google Calendar → send reply back to Telegram
+    We process the message and call the Telegram API to send a reply.
+    Always returns 200 — otherwise Telegram keeps retrying.
     """
     config = Config()
 
     if not config.telegram_bot_token:
-        return "", 200  # bot not configured — ignore silently
+        return "", 200
 
     data = request.get_json(silent=True)
     if not data:
@@ -167,7 +158,6 @@ def telegram_webhook():
     if chat_id and reply:
         bot.send(chat_id, reply)
 
-    # Always 200 — Telegram must know we received the update
     return "", 200
 
 
