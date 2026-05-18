@@ -453,12 +453,6 @@ async function loadToday() {
     } else {
       list.innerHTML=events.map(e=>`
         <div class="today-event">
-          ${e.allDay?'<span class="today-allday">ALL DAY</span>':'<span class="today-time">${e.time||'?'}</span>'}
-          <span class="today-title">${esc(e.title)}</span>
-        </div>`).join('').replace(/\$\{e\.time\|\|'\?'\}/g, events.map(e=>e.time||'?').join('|').split('|')[0]);
-      // Rebuild properly
-      list.innerHTML=events.map(e=>`
-        <div class="today-event">
           ${e.allDay?'<span class="today-allday">ALL DAY</span>':`<span class="today-time">${esc(e.time||'?')}</span>`}
           <span class="today-title">${esc(e.title)}</span>
         </div>`).join('');
