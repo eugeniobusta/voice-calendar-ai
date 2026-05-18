@@ -114,6 +114,7 @@ def parse():
                 "date":     event.date,
                 "time":     event.start_time,
                 "location": event.location,
+                "calendar": event.calendar,
             })
 
         for task in data.tasks:

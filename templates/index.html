@@ -3,51 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-
-    <!-- These three lines make it installable as a home screen app on iPhone -->
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Voice Cal">
-
     <title>Voice Calendar</title>
+
+    <!-- UI/UX Pro Max: Geometric Modern pairing — Outfit (headings) + DM Sans (body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
+
     <style>
-        /* ── Reset & base ───────────────────────────────────────── */
+        /* ── UI/UX Pro Max: Dark Mode OLED + Voice-First Multimodal ─────────
+           Colors: Productivity Tool palette — teal #0D9488, orange #F97316
+           Typography: Outfit (headings) + DM Sans (body)
+           Style: Voice waveform visualization, listening pulse, minimal chrome
+        ──────────────────────────────────────────────────────────────────── */
+
+        :root {
+            --bg-deep:       #070B14;
+            --bg-card:       rgba(255, 255, 255, 0.04);
+            --bg-card-hover: rgba(255, 255, 255, 0.06);
+            --border:        rgba(255, 255, 255, 0.08);
+            --border-focus:  rgba(13, 148, 136, 0.5);
+            --teal:          #0D9488;
+            --teal-light:    #14B8A6;
+            --teal-dim:      rgba(13, 148, 136, 0.15);
+            --orange:        #F97316;
+            --red-rec:       #EF4444;
+            --text-primary:  #F1F5F9;
+            --text-secondary:#94A3B8;
+            --text-muted:    #475569;
+            --success:       #10B981;
+            --error:         #F87171;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            /* -apple-system uses the native iOS font (San Francisco) */
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #f2f2f7;   /* iOS system background color */
+        html, body {
             min-height: 100vh;
-            padding: env(safe-area-inset-top, 20px) 16px 40px;
-            color: #1c1c1e;
+            background: var(--bg-deep);
         }
 
-        .container { max-width: 480px; margin: 0 auto; padding-top: 16px; }
+        body {
+            font-family: 'DM Sans', -apple-system, sans-serif;
+            color: var(--text-primary);
+            /* Subtle radial glow in top-left corner */
+            background-image:
+                radial-gradient(ellipse 800px 600px at -10% -10%, rgba(13,148,136,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 600px 500px at 110% 110%, rgba(249,115,22,0.06) 0%, transparent 60%);
+        }
 
-        h1 { font-size: 28px; font-weight: 700; }
+        .page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 48px 20px 60px;
+        }
 
-        .subtitle { font-size: 15px; color: #8e8e93; margin: 4px 0 24px; }
+        .container {
+            width: 100%;
+            max-width: 440px;
+        }
 
-        /* ── Cards (white rounded boxes) ───────────────────────── */
+        /* ── Header ──────────────────────────────────────────────────────── */
+        .header {
+            margin-bottom: 36px;
+        }
+
+        .logo-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--teal), var(--teal-light));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+            box-shadow: 0 0 20px rgba(13,148,136,0.35);
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            /* Gradient text */
+            background: linear-gradient(135deg, #F1F5F9 30%, var(--teal-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin-left: 46px;
+        }
+
+        /* ── Glass card ──────────────────────────────────────────────────── */
         .card {
-            background: white;
-            border-radius: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
             padding: 20px;
             margin-bottom: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            transition: border-color 0.2s;
         }
 
-        .section-label {
-            font-size: 12px;
+        .card:focus-within {
+            border-color: var(--border-focus);
+        }
+
+        .label {
+            font-size: 11px;
             font-weight: 600;
+            letter-spacing: 1px;
             text-transform: uppercase;
-            letter-spacing: 0.6px;
-            color: #8e8e93;
+            color: var(--text-muted);
             margin-bottom: 10px;
         }
 
-        /* ── Password field ────────────────────────────────────── */
+        /* ── Password ────────────────────────────────────────────────────── */
         .input-row {
             display: flex;
             align-items: center;
@@ -56,170 +145,292 @@
 
         input[type="password"] {
             flex: 1;
+            background: transparent;
             border: none;
             outline: none;
-            font-size: 17px;
+            font-size: 16px;
             font-family: inherit;
-            color: #1c1c1e;
-            background: transparent;
-            padding: 2px 0;
+            color: var(--text-primary);
+            letter-spacing: 2px;
         }
 
-        input[type="password"]::placeholder { color: #c7c7cc; }
-
-        /* ── Text area ─────────────────────────────────────────── */
-        textarea {
-            width: 100%;
-            border: none;
-            outline: none;
-            font-size: 17px;
-            font-family: inherit;
-            color: #1c1c1e;
-            resize: none;
-            min-height: 80px;
-            background: transparent;
-            line-height: 1.5;
+        input[type="password"]::placeholder {
+            color: var(--text-muted);
+            letter-spacing: 0;
         }
 
-        textarea::placeholder { color: #c7c7cc; }
+        .lock-icon {
+            font-size: 16px;
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
 
-        /* ── Record button ─────────────────────────────────────── */
-        .record-section {
+        .lock-icon.unlocked { color: var(--teal); }
+
+        /* ── Voice recorder card ─────────────────────────────────────────── */
+        .recorder-card {
+            text-align: center;
+            padding: 32px 20px 24px;
+        }
+
+        /* Waveform visualization — 5 bars that animate when recording */
+        .waveform {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            padding: 20px 0 8px;
+            justify-content: center;
+            gap: 5px;
+            height: 40px;
+            margin-bottom: 28px;
         }
 
-        .record-btn {
-            width: 80px;
-            height: 80px;
+        .waveform-bar {
+            width: 3px;
+            border-radius: 2px;
+            background: var(--teal);
+            opacity: 0.25;
+            height: 8px;
+            transition: opacity 0.3s;
+        }
+
+        /* When recording: bars animate at different heights and speeds */
+        .recording .waveform-bar {
+            opacity: 1;
+            animation: wave 1s ease-in-out infinite;
+        }
+
+        .recording .waveform-bar:nth-child(1) { animation-delay: 0.0s; }
+        .recording .waveform-bar:nth-child(2) { animation-delay: 0.1s; }
+        .recording .waveform-bar:nth-child(3) { animation-delay: 0.2s; }
+        .recording .waveform-bar:nth-child(4) { animation-delay: 0.3s; }
+        .recording .waveform-bar:nth-child(5) { animation-delay: 0.4s; }
+        .recording .waveform-bar:nth-child(6) { animation-delay: 0.15s; }
+        .recording .waveform-bar:nth-child(7) { animation-delay: 0.25s; }
+
+        @keyframes wave {
+            0%, 100% { height: 6px; }
+            50%       { height: 32px; }
+        }
+
+        /* The microphone button */
+        .mic-wrap {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        /* Animated ring that pulses when recording */
+        .mic-ring {
+            position: absolute;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
-            background: #ff3b30;
+            border: 2px solid var(--red-rec);
+            opacity: 0;
+            transform: scale(1);
+        }
+
+        .recording .mic-ring {
+            animation: ring-pulse 1.6s ease-out infinite;
+        }
+
+        @keyframes ring-pulse {
+            0%   { opacity: 0.6; transform: scale(1); }
+            100% { opacity: 0;   transform: scale(1.6); }
+        }
+
+        .mic-btn {
+            position: relative;
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
             border: none;
             cursor: pointer;
-            font-size: 32px;
-            box-shadow: 0 4px 16px rgba(255,59,48,0.35);
-            transition: transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            transition: transform 0.15s, box-shadow 0.15s;
             -webkit-tap-highlight-color: transparent;
-            /* Prevent accidental text selection on long press */
             -webkit-user-select: none;
             user-select: none;
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+            box-shadow: 0 4px 24px rgba(239, 68, 68, 0.4);
         }
 
-        .record-btn:active { transform: scale(0.93); }
-
-        /* Pulse animation while recording */
-        .record-btn.recording {
-            animation: pulse 1.4s ease-in-out infinite;
+        .recording .mic-btn {
+            background: linear-gradient(135deg, #DC2626, #B91C1C);
+            box-shadow: 0 4px 32px rgba(239, 68, 68, 0.6);
         }
 
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 4px 16px rgba(255,59,48,0.35); }
-            50%       { box-shadow: 0 4px 40px rgba(255,59,48,0.65); transform: scale(1.06); }
+        .mic-btn:active { transform: scale(0.92); }
+
+        .mic-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 400;
         }
 
-        .record-label {
-            margin-top: 12px;
-            font-size: 14px;
-            color: #8e8e93;
+        .recording .mic-label {
+            color: var(--red-rec);
         }
 
-        .or-divider {
-            text-align: center;
-            font-size: 12px;
-            color: #c7c7cc;
-            font-weight: 600;
-            margin: 16px 0 12px;
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0 16px;
         }
 
-        /* ── Submit button ─────────────────────────────────────── */
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .divider-text {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* ── Textarea ────────────────────────────────────────────────────── */
+        textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            color: var(--text-primary);
+            resize: none;
+            line-height: 1.6;
+            min-height: 72px;
+        }
+
+        textarea::placeholder { color: var(--text-muted); }
+
+        /* ── Submit button ───────────────────────────────────────────────── */
         .submit-btn {
             width: 100%;
-            padding: 17px;
-            background: #007aff;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--teal) 0%, var(--teal-light) 100%);
             color: white;
             border: none;
-            border-radius: 14px;
-            font-size: 17px;
+            border-radius: 16px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
             font-weight: 600;
-            font-family: inherit;
             cursor: pointer;
             margin-bottom: 12px;
+            letter-spacing: 0.2px;
+            transition: opacity 0.15s, transform 0.15s;
+            box-shadow: 0 4px 24px rgba(13, 148, 136, 0.35);
             -webkit-tap-highlight-color: transparent;
-            transition: opacity 0.15s;
         }
 
-        .submit-btn:active { opacity: 0.75; }
-        .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .submit-btn:active  { opacity: 0.85; transform: scale(0.99); }
+        .submit-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 
-        /* ── Loading spinner ───────────────────────────────────── */
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #8e8e93;
-            font-size: 15px;
+        /* ── Loading ─────────────────────────────────────────────────────── */
+        .loading-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 20px;
         }
 
         .spinner {
-            display: inline-block;
             width: 18px; height: 18px;
-            border: 2px solid #e5e5ea;
-            border-top-color: #007aff;
+            border: 2px solid rgba(13, 148, 136, 0.25);
+            border-top-color: var(--teal);
             border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-            margin-right: 8px;
-            vertical-align: middle;
+            animation: spin 0.65s linear infinite;
+            flex-shrink: 0;
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── Results ───────────────────────────────────────────── */
-        .transcript-box {
+        .loading-text {
             font-size: 14px;
-            color: #636366;
+            color: var(--text-secondary);
+        }
+
+        /* ── Results ─────────────────────────────────────────────────────── */
+        .transcript-box {
+            font-size: 13px;
+            color: var(--text-secondary);
             font-style: italic;
-            background: #f9f9fb;
-            border-radius: 10px;
-            padding: 12px 14px;
-            margin-bottom: 12px;
-            line-height: 1.5;
+            background: rgba(13, 148, 136, 0.06);
+            border: 1px solid rgba(13, 148, 136, 0.15);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            line-height: 1.6;
         }
 
         .result-item {
             display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid #f2f2f7;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
         }
 
-        .result-item:last-child { border-bottom: none; padding-bottom: 0; }
-        .result-item:first-child { padding-top: 0; }
+        .result-item:first-child { padding-top: 2px; }
+        .result-item:last-child  { border-bottom: none; padding-bottom: 2px; }
 
         .result-icon {
-            width: 38px; height: 38px;
-            border-radius: 9px;
+            width: 40px; height: 40px;
+            border-radius: 11px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 18px;
             flex-shrink: 0;
         }
 
-        .result-icon.event { background: #e8f0fe; }
-        .result-icon.task  { background: #fef3e2; }
+        .result-icon.event { background: var(--teal-dim); }
+        .result-icon.task  { background: rgba(249,115,22,0.12); }
 
-        .result-title  { font-size: 16px; font-weight: 600; line-height: 1.3; }
-        .result-detail { font-size: 13px; color: #8e8e93; margin-top: 2px; }
+        .result-info { flex: 1; min-width: 0; }
 
-        /* ── Error ─────────────────────────────────────────────── */
+        .result-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .result-detail {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .result-calendar {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            background: var(--teal-dim);
+            color: var(--teal-light);
+            border-radius: 6px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* Error */
         .error-card {
-            background: #fff2f2;
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.2);
             border-radius: 14px;
             padding: 16px;
-            color: #d93025;
-            font-size: 15px;
+            color: var(--error);
+            font-size: 14px;
             line-height: 1.5;
         }
 
@@ -227,51 +438,78 @@
     </style>
 </head>
 <body>
+<div class="page">
 <div class="container">
 
-    <h1>Voice Calendar</h1>
-    <p class="subtitle">Speak or type — events go straight to your calendar</p>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo-row">
+            <div class="logo-icon">🎙</div>
+            <h1>Voice Calendar</h1>
+        </div>
+        <p class="subtitle">Speak or type — events appear instantly</p>
+    </div>
 
-    <!-- ── Password card ─────────────────────────────────────────── -->
-    <div class="card" id="authCard">
-        <p class="section-label">Password</p>
+    <!-- Password -->
+    <div class="card">
+        <p class="label">Password</p>
         <div class="input-row">
             <input type="password" id="secretInput"
-                   placeholder="Enter your app password"
+                   placeholder="Enter password"
                    autocomplete="current-password">
-            <span id="lockIcon">🔒</span>
+            <span class="lock-icon" id="lockIcon">🔒</span>
         </div>
     </div>
 
-    <!-- ── Input card (record + text) ───────────────────────────── -->
-    <div class="card">
-        <!-- Voice recording -->
-        <div class="record-section">
-            <button class="record-btn" id="recordBtn" onclick="toggleRecord()">🎤</button>
-            <div class="record-label" id="recordLabel">Tap to record</div>
+    <!-- Recorder + Text input -->
+    <div class="card recorder-card" id="recorderCard">
+
+        <!-- Waveform visualization — animates during recording -->
+        <div class="waveform">
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
+            <div class="waveform-bar"></div>
         </div>
 
-        <div class="or-divider">— or type below —</div>
+        <!-- Mic button with animated ring -->
+        <div class="mic-wrap">
+            <div class="mic-ring"></div>
+            <button class="mic-btn" id="micBtn" onclick="toggleRecord()">🎤</button>
+        </div>
+        <p class="mic-label" id="micLabel">Tap to record</p>
 
-        <p class="section-label">Your message</p>
+        <!-- Divider -->
+        <div class="divider">
+            <div class="divider-line"></div>
+            <span class="divider-text">or type below</span>
+            <div class="divider-line"></div>
+        </div>
+
+        <p class="label">Your message</p>
         <textarea id="textInput" rows="3"
-            placeholder="e.g. Dentist Thursday 2pm, team standup every Monday 9am at the office…"
+            placeholder="e.g. Dentist Thursday 2pm, gym every Monday 7am…"
         ></textarea>
     </div>
 
-    <!-- ── Submit button ─────────────────────────────────────────── -->
+    <!-- Submit -->
     <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">
         Add to Calendar →
     </button>
 
-    <!-- ── Loading ───────────────────────────────────────────────── -->
-    <div class="hidden card loading" id="loadingEl">
-        <span class="spinner"></span> Processing…
+    <!-- Loading -->
+    <div class="hidden card loading-card" id="loadingEl">
+        <div class="spinner"></div>
+        <span class="loading-text">Processing your message…</span>
     </div>
 
-    <!-- ── Results ───────────────────────────────────────────────── -->
+    <!-- Results -->
     <div class="hidden" id="resultsEl"></div>
 
+</div>
 </div>
 
 <script>
@@ -282,58 +520,49 @@ let isRecording   = false;
 let recordedBlob  = null;
 let recordedMime  = '';
 
-// ── Persist password in localStorage so user doesn't retype each visit ──
+// ── Persist password ──────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
     const saved = localStorage.getItem('vcal_secret');
     if (saved) document.getElementById('secretInput').value = saved;
 });
 
-document.getElementById('secretInput').addEventListener('change', () => {
-    localStorage.setItem('vcal_secret', document.getElementById('secretInput').value);
-    document.getElementById('lockIcon').textContent = '🔓';
+document.getElementById('secretInput').addEventListener('input', () => {
+    const val = document.getElementById('secretInput').value;
+    localStorage.setItem('vcal_secret', val);
+    document.getElementById('lockIcon').textContent = val ? '🔓' : '🔒';
+    document.getElementById('lockIcon').className = 'lock-icon' + (val ? ' unlocked' : '');
 });
 
-// ── Recording ────────────────────────────────────────────────────────────
+// ── Recording ─────────────────────────────────────────────────────────────
 async function toggleRecord() {
-    if (isRecording) {
-        stopRecording();
-    } else {
-        await startRecording();
-    }
+    isRecording ? stopRecording() : await startRecording();
 }
 
 async function startRecording() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-        // iOS Safari records as audio/mp4; Chrome/Firefox use audio/webm
-        // We try formats in order of preference
         const mimeType =
             MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' :
-            MediaRecorder.isTypeSupported('audio/webm')              ? 'audio/webm'              :
-            'audio/mp4';
+            MediaRecorder.isTypeSupported('audio/webm')              ? 'audio/webm' : 'audio/mp4';
 
         mediaRecorder = new MediaRecorder(stream, { mimeType });
-        audioChunks = [];
+        audioChunks   = [];
 
-        mediaRecorder.ondataavailable = (e) => {
-            if (e.data.size > 0) audioChunks.push(e.data);
-        };
-
+        mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
         mediaRecorder.onstop = () => {
             recordedMime = mimeType;
             recordedBlob = new Blob(audioChunks, { type: mimeType });
-            stream.getTracks().forEach(t => t.stop());  // release the microphone
+            stream.getTracks().forEach(t => t.stop());
             onRecordingReady();
         };
 
-        mediaRecorder.start(200);  // emit data every 200ms (required on some browsers)
+        mediaRecorder.start(200);
         isRecording = true;
-        setRecordUI(true);
+        setRecordingUI(true);
 
-    } catch (err) {
-        // This happens if the user denies microphone permission
-        alert('Microphone access was denied.\n\nTo fix: go to your browser settings and allow microphone access for this site, then refresh.');
+    } catch {
+        alert('Microphone access denied.\n\nAllow microphone access in your browser settings, then refresh.');
     }
 }
 
@@ -344,33 +573,30 @@ function stopRecording() {
     }
 }
 
-function setRecordUI(recording) {
-    const btn   = document.getElementById('recordBtn');
-    const label = document.getElementById('recordLabel');
-    if (recording) {
-        btn.classList.add('recording');
-        btn.textContent = '⏹';
-        label.textContent = 'Recording… tap to stop';
-    } else {
-        btn.classList.remove('recording');
-        btn.textContent = '🎤';
-    }
+function setRecordingUI(on) {
+    const card  = document.getElementById('recorderCard');
+    const btn   = document.getElementById('micBtn');
+    const label = document.getElementById('micLabel');
+
+    card.classList.toggle('recording', on);
+    btn.textContent  = on ? '⏹' : '🎤';
+    label.textContent = on ? 'Recording — tap to stop' : 'Tap to record';
 }
 
 function onRecordingReady() {
-    setRecordUI(false);
-    document.getElementById('recordLabel').textContent = '✓ Recording ready — tap Add to Calendar';
+    setRecordingUI(false);
+    document.getElementById('micLabel').textContent = '✓ Recording ready';
+    document.getElementById('micLabel').style.color = 'var(--teal-light)';
     document.getElementById('textInput').value = '';
-    document.getElementById('textInput').placeholder = '';
 }
 
-// ── Submit ───────────────────────────────────────────────────────────────
+// ── Submit ────────────────────────────────────────────────────────────────
 async function handleSubmit() {
     const text   = document.getElementById('textInput').value.trim();
     const secret = document.getElementById('secretInput').value.trim();
 
     if (!text && !recordedBlob) {
-        alert('Please record a voice note or type a message first.');
+        alert('Record a voice note or type a message first.');
         return;
     }
 
@@ -378,36 +604,30 @@ async function handleSubmit() {
     clearResults();
 
     try {
-        const formData = new FormData();
+        const form = new FormData();
 
         if (recordedBlob) {
-            // Pick the right file extension based on what the browser recorded
             const ext = recordedMime.includes('mp4') ? 'm4a' : 'webm';
-            formData.append('audio', recordedBlob, `recording.${ext}`);
+            form.append('audio', recordedBlob, `recording.${ext}`);
         } else {
-            formData.append('text', text);
+            form.append('text', text);
         }
 
-        // Send the user's timezone so the AI resolves "tomorrow" correctly
-        // Intl.DateTimeFormat().resolvedOptions().timeZone returns e.g. "America/New_York"
-        formData.append('timezone', Intl.DateTimeFormat().resolvedOptions().timeZone);
+        form.append('timezone', Intl.DateTimeFormat().resolvedOptions().timeZone);
+        if (secret) form.append('secret', secret);
 
-        // Send the password to the server for verification
-        if (secret) formData.append('secret', secret);
-
-        const res  = await fetch('/parse', { method: 'POST', body: formData });
+        const res  = await fetch('/parse', { method: 'POST', body: form });
         const data = await res.json();
 
         if (!res.ok || data.error) throw new Error(data.error || 'Unknown error');
 
         renderResults(data);
 
-        // Reset input state after successful submission
+        // Reset
         recordedBlob = null;
         document.getElementById('textInput').value = '';
-        document.getElementById('recordLabel').textContent = 'Tap to record';
-        document.getElementById('textInput').placeholder =
-            'e.g. Dentist Thursday 2pm, team standup every Monday 9am at the office…';
+        document.getElementById('micLabel').textContent = 'Tap to record';
+        document.getElementById('micLabel').style.color = '';
 
     } catch (err) {
         renderError(err.message);
@@ -416,7 +636,7 @@ async function handleSubmit() {
     }
 }
 
-// ── Rendering ────────────────────────────────────────────────────────────
+// ── Rendering ─────────────────────────────────────────────────────────────
 function setLoading(show) {
     document.getElementById('loadingEl').classList.toggle('hidden', !show);
     document.getElementById('submitBtn').disabled = show;
@@ -434,15 +654,14 @@ function renderResults(data) {
 
     let html = '';
 
-    // If it was a voice note, show what was heard
     if (data.transcript) {
         html += `<div class="transcript-box">"${esc(data.transcript)}"</div>`;
     }
 
     if (!data.created || data.created.length === 0) {
-        html += `<div class="card" style="text-align:center;color:#8e8e93;padding:24px">
-                   No events or tasks found.<br>
-                   <small>Try including a specific date or time.</small>
+        html += `<div class="card" style="text-align:center;padding:28px;color:var(--text-secondary)">
+                   No events found.<br>
+                   <small style="color:var(--text-muted)">Try including a date or time.</small>
                  </div>`;
     } else {
         html += '<div class="card">';
@@ -453,20 +672,24 @@ function renderResults(data) {
 
             let detail = '';
             if (isEvent) {
-                if (item.date)     detail += item.date;
-                if (item.time)     detail += ` · ${item.time}`;
+                if (item.date) detail += item.date;
+                if (item.time) detail += ` · ${item.time}`;
                 if (item.location) detail += ` · ${esc(item.location)}`;
             } else {
-                detail = item.deadline ? `Due ${item.deadline}` : 'Added to calendar';
+                detail = item.deadline ? `Due ${item.deadline}` : 'No deadline set';
             }
+
+            const calBadge = item.calendar
+                ? `<span class="result-calendar">${esc(item.calendar)}</span>` : '';
 
             html += `
               <div class="result-item">
                 <div class="result-icon ${cls}">${icon}</div>
-                <div>
+                <div class="result-info">
                   <div class="result-title">${esc(item.title)}</div>
                   <div class="result-detail">${detail}</div>
                 </div>
+                ${calBadge}
               </div>`;
         }
         html += '</div>';
@@ -475,20 +698,17 @@ function renderResults(data) {
     el.innerHTML = html;
 }
 
-function renderError(message) {
+function renderError(msg) {
     const el = document.getElementById('resultsEl');
     el.classList.remove('hidden');
-    el.innerHTML = `<div class="error-card">⚠ ${esc(message)}</div>`;
+    el.innerHTML = `<div class="error-card">⚠ ${esc(msg)}</div>`;
 }
 
-// Prevent XSS: escape any user-originated text before inserting into HTML
 function esc(str) {
     if (!str) return '';
     return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 </script>
 </body>
