@@ -127,7 +127,7 @@ class TelegramBot:
         """
         # Parse with Groq AI
         try:
-            parser = Parser(api_key=self.config.groq_api_key, model=self.config.groq_model)
+            parser = Parser(config=self.config)
             raw  = parser.parse(text)
             data = validate_events(raw)
         except Exception as e:

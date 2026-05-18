@@ -95,7 +95,7 @@ def parse():
 
     # ── Step 2: Parse with Groq AI ─────────────────────────────────────────
     try:
-        parser = Parser(api_key=config.groq_api_key, model=config.groq_model)
+        parser = Parser(config=config)
         raw    = parser.parse(text)
         data   = validate_events(raw)
     except Exception as e:
