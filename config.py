@@ -51,6 +51,11 @@ class Config:
         self.google_client_secret  = os.getenv("GOOGLE_CLIENT_SECRET", "")
         self.google_refresh_token  = os.getenv("GOOGLE_REFRESH_TOKEN", "")
 
+        # ── Telegram bot ──────────────────────────────────────────────────
+        # Token from @BotFather. Chat ID from sending /start to your bot.
+        self.telegram_bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "")
+        self.telegram_chat_id   = os.getenv("TELEGRAM_CHAT_ID", "")
+
         self._validate()
 
     def _validate(self):

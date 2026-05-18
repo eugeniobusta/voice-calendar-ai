@@ -1,28 +1,10 @@
 """
 app.py — Flask web server for Voice Calendar AI.
 
-WHAT IS FLASK?
-  Flask is a lightweight Python web framework.
-  A web framework makes it easy to:
-    - Receive HTTP requests (GET, POST)
-    - Route requests to the right function based on the URL
-    - Return responses (HTML pages, JSON data)
-
-  Think of it as a post office:
-    - Requests arrive at the door
-    - Flask reads the address (URL + method)
-    - Routes them to the correct function
-    - That function returns a response
-
-HOW THIS DIFFERS FROM main.py:
-  main.py   → Command-line tool. Runs on your Mac. Uses local Whisper + AppleScript.
-  app.py    → Web server. Runs on Render cloud. Uses Groq Whisper API + Google Calendar.
-
-  Both share: Parser, Validator, Storage (same AI parsing logic, reused)
-
-TWO ROUTES:
-  GET  /       → serves the HTML page (what the browser loads when you visit)
-  POST /parse  → the actual processing endpoint (called by JavaScript in the page)
+THREE ROUTES:
+  GET  /          → serves the mobile web page
+  POST /parse     → web app endpoint (called by browser JavaScript)
+  POST /telegram  → Telegram bot webhook (called by Telegram's servers)
 
 DEPLOYMENT:
   Locally:    python app.py     (runs on http://localhost:5001)
@@ -36,6 +18,7 @@ from src.validator import validate_events
 from src.transcriber_cloud import CloudTranscriber
 from src.google_calendar import GoogleCalendarWriter
 from src.storage import Storage
+from src.telegram_bot import TelegramBot
 
 
 app = Flask(__name__)
@@ -153,8 +136,41 @@ def parse():
     return jsonify({"transcript": text, "created": created})
 
 
+@app.route("/telegram", methods=["POST"])
+def telegram_webhook():
+    """
+    Telegram calls this URL every time someone messages your bot.
+
+    HOW TELEGRAM WEBHOOKS WORK:
+      When you (or anyone) send a message to your Telegram bot,
+      Telegram makes a POST request to this URL with the message as JSON.
+      We process it and call the Telegram API to send a reply.
+      We always return HTTP 200 — if we return anything else,
+      Telegram thinks delivery failed and keeps retrying.
+
+    FLOW:
+      Telegram POST → parse update → transcribe (if voice) →
+      Groq AI → Google Calendar → send reply back to Telegram
+    """
+    config = Config()
+
+    if not config.telegram_bot_token:
+        return "", 200  # bot not configured — ignore silently
+
+    data = request.get_json(silent=True)
+    if not data:
+        return "", 200
+
+    bot = TelegramBot(config)
+    chat_id, reply = bot.handle_update(data)
+
+    if chat_id and reply:
+        bot.send(chat_id, reply)
+
+    # Always 200 — Telegram must know we received the update
+    return "", 200
+
+
 if __name__ == "__main__":
-    # When you run `python app.py` locally, this starts a development server.
-    # In production, gunicorn ignores this block and starts its own server.
     port = int(os.environ.get("PORT", 5001))
     app.run(debug=True, host="0.0.0.0", port=port)

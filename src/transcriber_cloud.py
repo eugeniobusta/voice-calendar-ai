@@ -58,3 +58,20 @@ class CloudTranscriber:
         if isinstance(transcription, str):
             return transcription.strip()
         return transcription.text.strip()
+
+    def transcribe_bytes(self, audio_bytes: bytes, filename: str) -> str:
+        """
+        Transcribes raw audio bytes — used by the Telegram bot.
+
+        Same as transcribe() but accepts bytes + a filename directly,
+        instead of a Flask FileStorage object.
+        The filename extension tells Groq the audio format (.ogg, .mp3, etc.)
+        """
+        transcription = self.client.audio.transcriptions.create(
+            file=(filename, audio_bytes),
+            model="whisper-large-v3-turbo",
+            response_format="text",
+        )
+        if isinstance(transcription, str):
+            return transcription.strip()
+        return transcription.text.strip()
