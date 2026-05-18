@@ -28,6 +28,7 @@ SQL BASICS (for beginners):
   SELECT        → reads rows
   ?             → a safe placeholder that prevents SQL injection attacks
 """
+import json
 import sqlite3
 from pathlib import Path
 from datetime import datetime
@@ -93,6 +94,35 @@ class Storage:
             (limit,)
         )
         return cursor.fetchall()
+
+    def get_history_for_api(self, limit: int = 30) -> list:
+        """Returns recent entries as a list of dicts for the web history endpoint."""
+        cursor = self.conn.execute(
+            """SELECT created_at, input_text, event_count, task_count, parsed_json
+               FROM entries ORDER BY id DESC LIMIT ?""",
+            (limit,)
+        )
+        result = []
+        for created_at, input_text, event_count, task_count, parsed_json_str in cursor.fetchall():
+            try:
+                parsed = json.loads(parsed_json_str)
+            except Exception:
+                parsed = {"events": [], "tasks": []}
+            result.append({
+                "created_at": created_at,
+                "input_text": input_text[:120],
+                "event_count": event_count,
+                "task_count":  task_count,
+                "events": [
+                    {"title": e.get("title",""), "date": e.get("date",""), "time": e.get("start_time",""), "calendar": e.get("calendar","")}
+                    for e in parsed.get("events", [])
+                ],
+                "tasks": [
+                    {"title": t.get("title",""), "deadline": t.get("deadline","")}
+                    for t in parsed.get("tasks", [])
+                ],
+            })
+        return result
 
     def show_history(self):
         """Prints a formatted table of recent entries to the terminal."""

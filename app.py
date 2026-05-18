@@ -137,6 +137,17 @@ def parse():
     return jsonify({"transcript": text, "created": created})
 
 
+@app.route("/history", methods=["GET"])
+def history():
+    """Returns recent event history for the web app history tab."""
+    config = Config()
+    if config.app_secret:
+        if request.args.get("secret", "") != config.app_secret:
+            return jsonify({"error": "Unauthorized"}), 401
+    rows = Storage(config.db_path).get_history_for_api()
+    return jsonify(rows)
+
+
 @app.route("/telegram", methods=["POST"])
 def telegram_webhook():
     """

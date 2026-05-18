@@ -1,715 +1,1475 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Voice Cal">
-    <title>Voice Calendar</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Voice Cal">
+  <meta name="theme-color" id="themeColorMeta" content="#070B14">
+  <title>Voice Calendar</title>
 
-    <!-- UI/UX Pro Max: Geometric Modern pairing — Outfit (headings) + DM Sans (body) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
+  <!-- UI/UX Pro Max: Outfit (headings) + DM Sans (body) — Geometric Modern pairing -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
 
-    <style>
-        /* ── UI/UX Pro Max: Dark Mode OLED + Voice-First Multimodal ─────────
-           Colors: Productivity Tool palette — teal #0D9488, orange #F97316
-           Typography: Outfit (headings) + DM Sans (body)
-           Style: Voice waveform visualization, listening pulse, minimal chrome
-        ──────────────────────────────────────────────────────────────────── */
+  <style>
+    /* ─────────────────────────────────────────────────────────────────
+       DESIGN SYSTEM — UI/UX Pro Max
+       Style:  OLED Dark + Liquid Glass   (premium SaaS recommendation)
+       Colors: Productivity teal palette  #0D9488 / #14B8A6
+       Type:   Outfit (headings) + DM Sans (body)
+       ───────────────────────────────────────────────────────────────── */
 
-        :root {
-            --bg-deep:       #070B14;
-            --bg-card:       rgba(255, 255, 255, 0.04);
-            --bg-card-hover: rgba(255, 255, 255, 0.06);
-            --border:        rgba(255, 255, 255, 0.08);
-            --border-focus:  rgba(13, 148, 136, 0.5);
-            --teal:          #0D9488;
-            --teal-light:    #14B8A6;
-            --teal-dim:      rgba(13, 148, 136, 0.15);
-            --orange:        #F97316;
-            --red-rec:       #EF4444;
-            --text-primary:  #F1F5F9;
-            --text-secondary:#94A3B8;
-            --text-muted:    #475569;
-            --success:       #10B981;
-            --error:         #F87171;
-        }
+    :root {
+      /* Teal brand */
+      --teal:         #0D9488;
+      --teal-light:   #14B8A6;
+      --teal-dim:     rgba(20, 184, 166, 0.12);
+      --teal-glow:    rgba(20, 184, 166, 0.25);
+      --accent:       #F97316;
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+      /* Dark theme tokens (default) */
+      --bg:           #070B14;
+      --bg-2:         #0D1322;
+      --surface:      rgba(255, 255, 255, 0.045);
+      --surface-2:    rgba(255, 255, 255, 0.07);
+      --border:       rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(20, 184, 166, 0.45);
+      --primary:      var(--teal-light);
+      --primary-btn:  linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+      --text:         #F1F5F9;
+      --text-2:       #94A3B8;
+      --text-3:       #475569;
+      --success:      #10B981;
+      --error:        #F87171;
+      --warning:      #FBBF24;
 
-        html, body {
-            min-height: 100vh;
-            background: var(--bg-deep);
-        }
+      /* Shadows */
+      --shadow-sm:    0 1px 3px rgba(0,0,0,0.4);
+      --shadow-md:    0 4px 20px rgba(0,0,0,0.5);
+      --shadow-teal:  0 4px 24px rgba(13, 148, 136, 0.35);
+      --shadow-red:   0 4px 24px rgba(239, 68, 68, 0.4);
 
-        body {
-            font-family: 'DM Sans', -apple-system, sans-serif;
-            color: var(--text-primary);
-            /* Subtle radial glow in top-left corner */
-            background-image:
-                radial-gradient(ellipse 800px 600px at -10% -10%, rgba(13,148,136,0.12) 0%, transparent 60%),
-                radial-gradient(ellipse 600px 500px at 110% 110%, rgba(249,115,22,0.06) 0%, transparent 60%);
-        }
+      /* Motion */
+      --ease:         cubic-bezier(0.22, 1, 0.36, 1);
+      --ease-bounce:  cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
 
-        .page {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 48px 20px 60px;
-        }
+    /* ── Light mode overrides ─────────────────────────────────────── */
+    [data-theme="light"] {
+      --bg:           #F8FAFC;
+      --bg-2:         #F1F5F9;
+      --surface:      #FFFFFF;
+      --surface-2:    #F8FAFC;
+      --border:       rgba(0, 0, 0, 0.07);
+      --border-focus: rgba(13, 148, 136, 0.4);
+      --primary:      var(--teal);
+      --primary-btn:  linear-gradient(135deg, #0D9488 0%, #0F9E92 100%);
+      --text:         #0F172A;
+      --text-2:       #64748B;
+      --text-3:       #94A3B8;
+      --shadow-sm:    0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md:    0 4px 20px rgba(0,0,0,0.1);
+      --shadow-teal:  0 4px 24px rgba(13, 148, 136, 0.25);
+      --shadow-red:   0 4px 24px rgba(239, 68, 68, 0.3);
+    }
 
-        .container {
-            width: 100%;
-            max-width: 440px;
-        }
+    /* ── Reset ────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
+    body {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--text);
+      background: var(--bg);
+      min-height: 100%;
+      transition: background 0.3s var(--ease), color 0.3s var(--ease);
+      /* Atmospheric glow — premium depth effect */
+      background-image:
+        radial-gradient(ellipse 900px 700px at -5% -10%,  rgba(13,148,136,0.10) 0%, transparent 60%),
+        radial-gradient(ellipse 700px 600px at 105% 105%, rgba(249,115,22,0.05) 0%, transparent 60%);
+      overflow-x: hidden;
+    }
 
-        /* ── Header ──────────────────────────────────────────────────────── */
-        .header {
-            margin-bottom: 36px;
-        }
+    [data-theme="light"] body {
+      background-image:
+        radial-gradient(ellipse 900px 700px at -5% -10%,  rgba(13,148,136,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 700px 600px at 105% 105%, rgba(249,115,22,0.03) 0%, transparent 60%);
+    }
 
-        .logo-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 6px;
-        }
+    /* ── Custom scrollbar ─────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
 
-        .logo-icon {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--teal), var(--teal-light));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            flex-shrink: 0;
-            box-shadow: 0 0 20px rgba(13,148,136,0.35);
-        }
+    /* ── App shell ────────────────────────────────────────────────── */
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 0 0 env(safe-area-inset-bottom, 0);
+    }
 
-        h1 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 26px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            /* Gradient text */
-            background: linear-gradient(135deg, #F1F5F9 30%, var(--teal-light) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+    /* ── Header ───────────────────────────────────────────────────── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px 12px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      /* Liquid glass blur */
+      background: rgba(7, 11, 20, 0.75);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.3s;
+    }
 
-        .subtitle {
-            font-size: 14px;
-            color: var(--text-secondary);
-            font-weight: 400;
-            margin-left: 46px;
-        }
+    [data-theme="light"] .header {
+      background: rgba(248, 250, 252, 0.85);
+    }
 
-        /* ── Glass card ──────────────────────────────────────────────────── */
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 12px;
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            transition: border-color 0.2s;
-        }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
 
-        .card:focus-within {
-            border-color: var(--border-focus);
-        }
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      background: var(--primary-btn);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      box-shadow: var(--shadow-teal);
+      flex-shrink: 0;
+    }
 
-        .label {
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-        }
+    .logo-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      background: linear-gradient(135deg, var(--text) 40%, var(--primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
 
-        /* ── Password ────────────────────────────────────────────────────── */
-        .input-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
 
-        input[type="password"] {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            font-size: 16px;
-            font-family: inherit;
-            color: var(--text-primary);
-            letter-spacing: 2px;
-        }
+    /* ── Icon button ──────────────────────────────────────────────── */
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-2);
+      transition: background 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        input[type="password"]::placeholder {
-            color: var(--text-muted);
-            letter-spacing: 0;
-        }
+    .icon-btn:hover, .icon-btn:focus-visible {
+      background: var(--surface-2);
+      color: var(--text);
+    }
 
-        .lock-icon {
-            font-size: 16px;
-            color: var(--text-muted);
-            transition: color 0.2s;
-        }
+    .icon-btn svg { width: 18px; height: 18px; }
 
-        .lock-icon.unlocked { color: var(--teal); }
+    /* ── Tab navigation ───────────────────────────────────────────── */
+    .tabs {
+      display: flex;
+      padding: 12px 20px 0;
+      gap: 4px;
+      border-bottom: 1px solid var(--border);
+    }
 
-        /* ── Voice recorder card ─────────────────────────────────────────── */
-        .recorder-card {
-            text-align: center;
-            padding: 32px 20px 24px;
-        }
+    .tab {
+      flex: 1;
+      padding: 8px 12px 12px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-3);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.2s, border-color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
 
-        /* Waveform visualization — 5 bars that animate when recording */
-        .waveform {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            height: 40px;
-            margin-bottom: 28px;
-        }
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
 
-        .waveform-bar {
-            width: 3px;
-            border-radius: 2px;
-            background: var(--teal);
-            opacity: 0.25;
-            height: 8px;
-            transition: opacity 0.3s;
-        }
+    .tab svg { width: 15px; height: 15px; }
 
-        /* When recording: bars animate at different heights and speeds */
-        .recording .waveform-bar {
-            opacity: 1;
-            animation: wave 1s ease-in-out infinite;
-        }
+    /* ── Tab panels ───────────────────────────────────────────────── */
+    .panel {
+      flex: 1;
+      padding: 20px 20px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
-        .recording .waveform-bar:nth-child(1) { animation-delay: 0.0s; }
-        .recording .waveform-bar:nth-child(2) { animation-delay: 0.1s; }
-        .recording .waveform-bar:nth-child(3) { animation-delay: 0.2s; }
-        .recording .waveform-bar:nth-child(4) { animation-delay: 0.3s; }
-        .recording .waveform-bar:nth-child(5) { animation-delay: 0.4s; }
-        .recording .waveform-bar:nth-child(6) { animation-delay: 0.15s; }
-        .recording .waveform-bar:nth-child(7) { animation-delay: 0.25s; }
+    .panel.hidden { display: none; }
 
-        @keyframes wave {
-            0%, 100% { height: 6px; }
-            50%       { height: 32px; }
-        }
+    /* ── Glass card ───────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-sm);
+      transition:
+        background 0.3s var(--ease),
+        border-color 0.2s var(--ease),
+        box-shadow 0.2s var(--ease);
+    }
 
-        /* The microphone button */
-        .mic-wrap {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 16px;
-        }
+    .card:focus-within {
+      border-color: var(--border-focus);
+    }
 
-        /* Animated ring that pulses when recording */
-        .mic-ring {
-            position: absolute;
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            border: 2px solid var(--red-rec);
-            opacity: 0;
-            transform: scale(1);
-        }
+    .field-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--text-3);
+      display: block;
+      margin-bottom: 10px;
+    }
 
-        .recording .mic-ring {
-            animation: ring-pulse 1.6s ease-out infinite;
-        }
+    /* ── Password card ────────────────────────────────────────────── */
+    .password-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-        @keyframes ring-pulse {
-            0%   { opacity: 0.6; transform: scale(1); }
-            100% { opacity: 0;   transform: scale(1.6); }
-        }
+    input[type="password"],
+    input[type="text"],
+    input[type="email"] {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: var(--text);
+      width: 100%;
+    }
 
-        .mic-btn {
-            position: relative;
-            width: 72px;
-            height: 72px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            transition: transform 0.15s, box-shadow 0.15s;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-user-select: none;
-            user-select: none;
-            background: linear-gradient(135deg, #EF4444, #DC2626);
-            box-shadow: 0 4px 24px rgba(239, 68, 68, 0.4);
-        }
+    input::placeholder { color: var(--text-3); }
+    input[type="password"] { letter-spacing: 2px; }
+    input[type="password"]::placeholder { letter-spacing: 0; }
 
-        .recording .mic-btn {
-            background: linear-gradient(135deg, #DC2626, #B91C1C);
-            box-shadow: 0 4px 32px rgba(239, 68, 68, 0.6);
-        }
+    .lock-icon { font-size: 15px; color: var(--text-3); transition: color 0.2s; }
+    .lock-icon.open { color: var(--primary); }
 
-        .mic-btn:active { transform: scale(0.92); }
+    /* ── Recorder card ────────────────────────────────────────────── */
+    .recorder {
+      text-align: center;
+      padding: 24px 18px 20px;
+    }
 
-        .mic-label {
-            font-size: 13px;
-            color: var(--text-muted);
-            font-weight: 400;
-        }
+    /* Waveform bars — bell-curve heights, animate when recording */
+    .waveform {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      height: 48px;
+      margin-bottom: 24px;
+    }
 
-        .recording .mic-label {
-            color: var(--red-rec);
-        }
+    .bar {
+      width: 3px;
+      border-radius: 2px;
+      background: var(--primary);
+      opacity: 0.2;
+      height: var(--idle, 4px);
+      transition: opacity 0.4s var(--ease);
+      will-change: height;
+    }
 
-        /* Divider */
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 20px 0 16px;
-        }
+    /* Bell-curve max heights + timing per bar */
+    .bar:nth-child(1)  { --idle:4px; --max:10px; --dur:0.85s; --delay:0.00s; }
+    .bar:nth-child(2)  { --idle:4px; --max:16px; --dur:0.70s; --delay:0.08s; }
+    .bar:nth-child(3)  { --idle:4px; --max:24px; --dur:0.90s; --delay:0.16s; }
+    .bar:nth-child(4)  { --idle:4px; --max:32px; --dur:0.65s; --delay:0.04s; }
+    .bar:nth-child(5)  { --idle:5px; --max:42px; --dur:0.80s; --delay:0.20s; }
+    .bar:nth-child(6)  { --idle:6px; --max:48px; --dur:0.75s; --delay:0.00s; }
+    .bar:nth-child(7)  { --idle:6px; --max:48px; --dur:0.85s; --delay:0.12s; }
+    .bar:nth-child(8)  { --idle:5px; --max:42px; --dur:0.70s; --delay:0.24s; }
+    .bar:nth-child(9)  { --idle:4px; --max:32px; --dur:0.90s; --delay:0.06s; }
+    .bar:nth-child(10) { --idle:4px; --max:24px; --dur:0.75s; --delay:0.18s; }
+    .bar:nth-child(11) { --idle:4px; --max:16px; --dur:0.65s; --delay:0.10s; }
+    .bar:nth-child(12) { --idle:4px; --max:10px; --dur:0.80s; --delay:0.02s; }
 
-        .divider-line {
-            flex: 1;
-            height: 1px;
-            background: var(--border);
-        }
+    .recording .bar {
+      opacity: 1;
+      animation: wave var(--dur) ease-in-out var(--delay) infinite alternate;
+    }
 
-        .divider-text {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
+    @keyframes wave {
+      0%   { height: var(--idle); }
+      100% { height: var(--max); }
+    }
 
-        /* ── Textarea ────────────────────────────────────────────────────── */
-        textarea {
-            width: 100%;
-            background: transparent;
-            border: none;
-            outline: none;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 15px;
-            color: var(--text-primary);
-            resize: none;
-            line-height: 1.6;
-            min-height: 72px;
-        }
+    /* Idle breathing — very subtle pulse */
+    .bar { animation: breathe 4s ease-in-out infinite alternate; }
+    @keyframes breathe {
+      0%   { opacity: 0.15; }
+      100% { opacity: 0.30; }
+    }
 
-        textarea::placeholder { color: var(--text-muted); }
+    .recording .bar { animation: wave var(--dur) ease-in-out var(--delay) infinite alternate; opacity: 1; }
 
-        /* ── Submit button ───────────────────────────────────────────────── */
-        .submit-btn {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, var(--teal) 0%, var(--teal-light) 100%);
-            color: white;
-            border: none;
-            border-radius: 16px;
-            font-family: 'Outfit', sans-serif;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 12px;
-            letter-spacing: 0.2px;
-            transition: opacity 0.15s, transform 0.15s;
-            box-shadow: 0 4px 24px rgba(13, 148, 136, 0.35);
-            -webkit-tap-highlight-color: transparent;
-        }
+    /* Mic button */
+    .mic-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
 
-        .submit-btn:active  { opacity: 0.85; transform: scale(0.99); }
-        .submit-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+    /* Expanding ring — only visible while recording */
+    .mic-ring {
+      position: absolute;
+      width: 88px; height: 88px;
+      border-radius: 50%;
+      border: 1.5px solid #EF4444;
+      opacity: 0;
+      pointer-events: none;
+    }
 
-        /* ── Loading ─────────────────────────────────────────────────────── */
-        .loading-card {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 18px 20px;
-        }
+    .recording .mic-ring {
+      animation: ring 1.8s var(--ease) infinite;
+    }
 
-        .spinner {
-            width: 18px; height: 18px;
-            border: 2px solid rgba(13, 148, 136, 0.25);
-            border-top-color: var(--teal);
-            border-radius: 50%;
-            animation: spin 0.65s linear infinite;
-            flex-shrink: 0;
-        }
+    @keyframes ring {
+      0%   { opacity: 0.5; transform: scale(1); }
+      100% { opacity: 0;   transform: scale(1.65); }
+    }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+    .mic-btn {
+      position: relative;
+      width: 68px; height: 68px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      font-size: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(145deg, #EF4444, #DC2626);
+      box-shadow: var(--shadow-red);
+      transition: transform 0.15s var(--ease-bounce), box-shadow 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
 
-        .loading-text {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
+    .recording .mic-btn {
+      background: linear-gradient(145deg, #DC2626, #B91C1C);
+      box-shadow: 0 4px 32px rgba(239,68,68,0.55);
+    }
 
-        /* ── Results ─────────────────────────────────────────────────────── */
-        .transcript-box {
-            font-size: 13px;
-            color: var(--text-secondary);
-            font-style: italic;
-            background: rgba(13, 148, 136, 0.06);
-            border: 1px solid rgba(13, 148, 136, 0.15);
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-bottom: 10px;
-            line-height: 1.6;
-        }
+    .mic-btn:active { transform: scale(0.90); }
+    .mic-btn:not(:active):hover { transform: scale(1.05); }
 
-        .result-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 14px 0;
-            border-bottom: 1px solid var(--border);
-        }
+    .mic-status {
+      font-size: 13px;
+      color: var(--text-3);
+      font-weight: 500;
+      transition: color 0.2s;
+    }
 
-        .result-item:first-child { padding-top: 2px; }
-        .result-item:last-child  { border-bottom: none; padding-bottom: 2px; }
+    .recording .mic-status { color: #EF4444; }
+    .ready .mic-status     { color: var(--primary); }
 
-        .result-icon {
-            width: 40px; height: 40px;
-            border-radius: 11px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            flex-shrink: 0;
-        }
+    /* Divider */
+    .or-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 16px 0 14px;
+    }
 
-        .result-icon.event { background: var(--teal-dim); }
-        .result-icon.task  { background: rgba(249,115,22,0.12); }
+    .or-line { flex: 1; height: 1px; background: var(--border); }
+    .or-text  { font-size: 11px; color: var(--text-3); font-weight: 600; letter-spacing: 0.5px; }
 
-        .result-info { flex: 1; min-width: 0; }
+    /* Textarea */
+    textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: var(--text);
+      resize: none;
+      line-height: 1.6;
+      min-height: 68px;
+    }
 
-        .result-title {
-            font-family: 'Outfit', sans-serif;
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+    textarea::placeholder { color: var(--text-3); }
 
-        .result-detail {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
+    /* ── Submit button ─────────────────────────────────────────────── */
+    .submit-btn {
+      width: 100%;
+      padding: 17px;
+      background: var(--primary-btn);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      box-shadow: var(--shadow-teal);
+      transition: opacity 0.15s, transform 0.15s var(--ease-bounce), box-shadow 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        .result-calendar {
-            font-size: 11px;
-            font-weight: 600;
-            padding: 3px 8px;
-            background: var(--teal-dim);
-            color: var(--teal-light);
-            border-radius: 6px;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
+    .submit-btn:active  { transform: scale(0.98); opacity: 0.9; }
+    .submit-btn:hover:not(:active) { box-shadow: 0 6px 32px rgba(13,148,136,0.45); }
+    .submit-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; box-shadow: none; }
 
-        /* Error */
-        .error-card {
-            background: rgba(239, 68, 68, 0.08);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            border-radius: 14px;
-            padding: 16px;
-            color: var(--error);
-            font-size: 14px;
-            line-height: 1.5;
-        }
+    /* ── Loading ──────────────────────────────────────────────────── */
+    .loading-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 18px;
+    }
 
-        .hidden { display: none; }
-    </style>
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid var(--teal-dim);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.65s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-text { font-size: 14px; color: var(--text-2); }
+
+    /* ── Results ──────────────────────────────────────────────────── */
+    .transcript-box {
+      font-size: 13px;
+      color: var(--text-2);
+      font-style: italic;
+      background: var(--teal-dim);
+      border: 1px solid rgba(20,184,166,0.15);
+      border-radius: 12px;
+      padding: 11px 14px;
+      line-height: 1.6;
+    }
+
+    .result-item {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      animation: slideIn 0.3s var(--ease) both;
+    }
+
+    .result-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .result-item:first-child { padding-top: 0; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      flex-shrink: 0;
+    }
+
+    .result-icon.event { background: var(--teal-dim); }
+    .result-icon.task  { background: rgba(249,115,22,0.1); }
+
+    .result-body { flex: 1; min-width: 0; }
+
+    .result-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+
+    .result-meta { font-size: 12px; color: var(--text-2); }
+
+    .cal-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      background: var(--teal-dim);
+      color: var(--primary);
+      border-radius: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      border: 1px solid rgba(20,184,166,0.2);
+    }
+
+    /* ── Empty state ──────────────────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-3);
+    }
+
+    .empty-state .empty-icon { font-size: 40px; display: block; margin-bottom: 12px; opacity: 0.5; }
+    .empty-state p { font-size: 14px; }
+
+    /* Error card */
+    .error-card {
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 14px;
+      padding: 14px 16px;
+      color: var(--error);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── History tab ──────────────────────────────────────────────── */
+    .history-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 13px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: default;
+    }
+
+    .history-item:last-child { border-bottom: none; }
+
+    .history-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: var(--teal-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .history-body { flex: 1; min-width: 0; }
+
+    .history-input {
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+
+    .history-meta { font-size: 12px; color: var(--text-2); }
+    .history-time { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+    /* Loading skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 50%, var(--surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 8px;
+      height: 14px;
+    }
+
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    .skeleton-row { display: flex; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .skeleton-circle { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; background: var(--surface-2); }
+    .skeleton-lines { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+
+    /* ── Settings modal (bottom sheet on mobile) ──────────────────── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s var(--ease);
+    }
+
+    .overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .sheet {
+      position: absolute;
+      bottom: 0;
+      left: 0; right: 0;
+      background: var(--bg-2);
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      border-top: 1px solid var(--border);
+      padding: 16px 20px calc(env(safe-area-inset-bottom, 0) + 28px);
+      transform: translateY(100%);
+      transition: transform 0.4s var(--ease);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .overlay.open .sheet {
+      transform: translateY(0);
+    }
+
+    /* Drag handle */
+    .sheet-handle {
+      width: 36px; height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 0 auto 20px;
+    }
+
+    .sheet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .sheet-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    /* Settings sections */
+    .setting-group {
+      margin-bottom: 24px;
+    }
+
+    .setting-group-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 10px;
+    }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 6px;
+    }
+
+    .setting-row:last-child { margin-bottom: 0; }
+
+    .setting-label { font-size: 14px; font-weight: 500; }
+    .setting-hint  { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+
+    .setting-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text-2);
+      text-align: right;
+      min-width: 0;
+      max-width: 160px;
+    }
+
+    /* Theme selector — segmented control */
+    .theme-seg {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      gap: 2px;
+    }
+
+    .theme-seg button {
+      flex: 1;
+      padding: 8px 10px;
+      border: none;
+      border-radius: 9px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-3);
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .theme-seg button.active {
+      background: var(--surface-2);
+      color: var(--text);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Keyboard shortcut chips */
+    .shortcut-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--text-3);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-family: 'DM Sans', monospace;
+    }
+
+    /* About section */
+    .about-card {
+      background: var(--teal-dim);
+      border: 1px solid rgba(20,184,166,0.15);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .about-card .about-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .about-card .about-version {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-bottom: 12px;
+    }
+
+    .about-links {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .about-links a {
+      font-size: 13px;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    /* ── Toast system ─────────────────────────────────────────────── */
+    .toast-wrap {
+      position: fixed;
+      bottom: calc(env(safe-area-inset-bottom, 0) + 24px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 8px;
+      pointer-events: none;
+      width: calc(100% - 40px);
+      max-width: 440px;
+    }
+
+    .toast {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      font-size: 14px;
+      font-weight: 500;
+      pointer-events: all;
+      animation: toastIn 0.35s var(--ease-bounce) both;
+    }
+
+    .toast.removing { animation: toastOut 0.25s var(--ease) forwards; }
+
+    @keyframes toastIn  { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: none; } }
+    @keyframes toastOut { to   { opacity: 0; transform: translateY(10px) scale(0.95); } }
+
+    .toast-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .toast.success .toast-dot { background: var(--success); }
+    .toast.error   .toast-dot { background: var(--error); }
+    .toast.info    .toast-dot { background: var(--primary); }
+
+    /* ── Keyboard hint (desktop) ──────────────────────────────────── */
+    .kbd-hint {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-3);
+      padding: 4px 0 0;
+      display: none;
+    }
+
+    @media (hover: hover) { .kbd-hint { display: block; } }
+
+    /* ── Utility ─────────────────────────────────────────────────── */
+    .hidden { display: none !important; }
+
+    .mt-2 { margin-top: 8px; }
+
+    /* ── Responsive tweaks ────────────────────────────────────────── */
+    @media (min-width: 520px) {
+      .app { padding: 0 0 40px; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+      .sheet { left: 50%; right: auto; transform: translateX(-50%) translateY(100%); width: 480px; border-radius: 24px; bottom: 40px; }
+      .overlay.open .sheet { transform: translateX(-50%) translateY(0); }
+    }
+  </style>
 </head>
 <body>
-<div class="page">
-<div class="container">
+<div class="app">
 
-    <!-- Header -->
-    <div class="header">
-        <div class="logo-row">
-            <div class="logo-icon">🎙</div>
-            <h1>Voice Calendar</h1>
-        </div>
-        <p class="subtitle">Speak or type — events appear instantly</p>
+  <!-- ── Header ──────────────────────────────────────────────────── -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-mark">🎙</div>
+      <span class="logo-name">Voice Calendar</span>
     </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">
+        <!-- Sun icon (shown in dark mode) -->
+        <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32 1.41-1.41"/></svg>
+        <!-- Moon icon (shown in light mode) -->
+        <svg id="iconMoon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" class="hidden"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="icon-btn" id="settingsBtn" title="Settings" aria-label="Settings">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Tabs ────────────────────────────────────────────────────── -->
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-panel="new" role="tab" aria-selected="true">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+      New Event
+    </button>
+    <button class="tab" data-panel="history" role="tab" aria-selected="false">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+      History
+    </button>
+  </nav>
+
+  <!-- ── Panel: New Event ────────────────────────────────────────── -->
+  <div class="panel" id="panel-new" role="tabpanel">
 
     <!-- Password -->
     <div class="card">
-        <p class="label">Password</p>
-        <div class="input-row">
-            <input type="password" id="secretInput"
-                   placeholder="Enter password"
-                   autocomplete="current-password">
-            <span class="lock-icon" id="lockIcon">🔒</span>
-        </div>
+      <label class="field-label" for="pwInput">Password</label>
+      <div class="password-row">
+        <input type="password" id="pwInput" placeholder="App password" autocomplete="current-password">
+        <span class="lock-icon" id="lockIcon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </span>
+      </div>
     </div>
 
-    <!-- Recorder + Text input -->
-    <div class="card recorder-card" id="recorderCard">
+    <!-- Recorder -->
+    <div class="card recorder" id="recorderCard">
+      <!-- Animated waveform bars -->
+      <div class="waveform" aria-hidden="true">
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+      </div>
 
-        <!-- Waveform visualization — animates during recording -->
-        <div class="waveform">
-            <div class="waveform-bar"></div>
-            <div class="waveform-bar"></div>
-            <div class="waveform-bar"></div>
-            <div class="waveform-bar"></div>
-            <div class="waveform-bar"></div>
-            <div class="waveform-bar"></div>
-            <div class="waveform-bar"></div>
-        </div>
+      <!-- Mic button with pulsing ring -->
+      <div class="mic-wrap">
+        <div class="mic-ring" aria-hidden="true"></div>
+        <button class="mic-btn" id="micBtn" aria-label="Record voice note">🎤</button>
+      </div>
+      <p class="mic-status" id="micStatus">Tap to record</p>
 
-        <!-- Mic button with animated ring -->
-        <div class="mic-wrap">
-            <div class="mic-ring"></div>
-            <button class="mic-btn" id="micBtn" onclick="toggleRecord()">🎤</button>
-        </div>
-        <p class="mic-label" id="micLabel">Tap to record</p>
+      <!-- Divider -->
+      <div class="or-row"><div class="or-line"></div><span class="or-text">or type below</span><div class="or-line"></div></div>
 
-        <!-- Divider -->
-        <div class="divider">
-            <div class="divider-line"></div>
-            <span class="divider-text">or type below</span>
-            <div class="divider-line"></div>
-        </div>
-
-        <p class="label">Your message</p>
-        <textarea id="textInput" rows="3"
-            placeholder="e.g. Dentist Thursday 2pm, gym every Monday 7am…"
-        ></textarea>
+      <label class="field-label" for="textInput">Your message</label>
+      <textarea id="textInput" rows="3"
+        placeholder="e.g. Dentist Thursday 2pm, gym every Monday 7am…"
+        aria-label="Event description"
+      ></textarea>
     </div>
 
     <!-- Submit -->
     <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">
-        Add to Calendar →
+      Add to Calendar →
     </button>
+    <p class="kbd-hint">
+      <span class="shortcut-chip">⌘</span>&nbsp;<span class="shortcut-chip">↵</span> to submit &nbsp;·&nbsp;
+      <span class="shortcut-chip">⌘</span>&nbsp;<span class="shortcut-chip">R</span> to record
+    </p>
 
     <!-- Loading -->
-    <div class="hidden card loading-card" id="loadingEl">
-        <div class="spinner"></div>
-        <span class="loading-text">Processing your message…</span>
+    <div class="card loading-row hidden" id="loadingEl">
+      <div class="spinner"></div>
+      <span class="loading-text" id="loadingText">Processing…</span>
     </div>
 
     <!-- Results -->
-    <div class="hidden" id="resultsEl"></div>
+    <div id="resultsEl"></div>
 
+  </div>
+
+  <!-- ── Panel: History ──────────────────────────────────────────── -->
+  <div class="panel hidden" id="panel-history" role="tabpanel">
+    <div class="card" id="historyList">
+      <!-- skeleton rows -->
+      <div class="skeleton-row"><div class="skeleton-circle"></div><div class="skeleton-lines"><div class="skeleton" style="width:65%"></div><div class="skeleton" style="width:40%"></div></div></div>
+      <div class="skeleton-row"><div class="skeleton-circle"></div><div class="skeleton-lines"><div class="skeleton" style="width:80%"></div><div class="skeleton" style="width:35%"></div></div></div>
+      <div class="skeleton-row" style="border:none"><div class="skeleton-circle"></div><div class="skeleton-lines"><div class="skeleton" style="width:55%"></div><div class="skeleton" style="width:45%"></div></div></div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- ── Settings sheet ────────────────────────────────────────────── -->
+<div class="overlay" id="settingsOverlay" role="dialog" aria-modal="true" aria-label="Settings">
+  <div class="sheet" id="settingsSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <h2 class="sheet-title">Settings</h2>
+      <button class="icon-btn" id="closeSettings" aria-label="Close settings">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Appearance -->
+    <div class="setting-group">
+      <p class="setting-group-label">Appearance</p>
+      <div class="theme-seg" role="group" aria-label="Theme">
+        <button data-theme-val="system">System</button>
+        <button data-theme-val="dark" class="active">Dark</button>
+        <button data-theme-val="light">Light</button>
+      </div>
+    </div>
+
+    <!-- Security -->
+    <div class="setting-group">
+      <p class="setting-group-label">Security</p>
+      <div class="setting-row">
+        <div>
+          <p class="setting-label">App password</p>
+          <p class="setting-hint">Protects your web app</p>
+        </div>
+        <input class="setting-input" type="password" id="sPw" placeholder="Not set" autocomplete="new-password">
+      </div>
+    </div>
+
+    <!-- Regional -->
+    <div class="setting-group">
+      <p class="setting-group-label">Regional</p>
+      <div class="setting-row">
+        <div>
+          <p class="setting-label">Timezone</p>
+          <p class="setting-hint">For accurate event times</p>
+        </div>
+        <input class="setting-input" type="text" id="sTz" placeholder="Auto">
+      </div>
+    </div>
+
+    <!-- Shortcuts -->
+    <div class="setting-group">
+      <p class="setting-group-label">Keyboard shortcuts</p>
+      <div class="setting-row">
+        <p class="setting-label">Submit</p>
+        <span><span class="shortcut-chip">⌘</span> <span class="shortcut-chip">↵</span></span>
+      </div>
+      <div class="setting-row">
+        <p class="setting-label">Record / stop</p>
+        <span><span class="shortcut-chip">⌘</span> <span class="shortcut-chip">R</span></span>
+      </div>
+      <div class="setting-row">
+        <p class="setting-label">Close modal</p>
+        <span><span class="shortcut-chip">Esc</span></span>
+      </div>
+    </div>
+
+    <!-- About -->
+    <div class="setting-group">
+      <p class="setting-group-label">About</p>
+      <div class="about-card">
+        <p class="about-name">Voice Calendar</p>
+        <p class="about-version">v2.0 · Built with Python + Claude</p>
+        <div class="about-links">
+          <a href="https://github.com/eugeniobusta/voice-calendar-ai" target="_blank">GitHub</a>
+          <a href="https://console.groq.com" target="_blank">Groq</a>
+        </div>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="saveSettingsBtn">Save Settings</button>
+  </div>
 </div>
-</div>
+
+<!-- ── Toast container ───────────────────────────────────────────── -->
+<div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
 
 <script>
-// ── State ────────────────────────────────────────────────────────────────
-let mediaRecorder = null;
-let audioChunks   = [];
-let isRecording   = false;
-let recordedBlob  = null;
-let recordedMime  = '';
+// ═══════════════════════════════════════════════════════════════════
+//  THEME
+// ═══════════════════════════════════════════════════════════════════
+const Theme = {
+  _stored: null,
 
-// ── Persist password ──────────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
-    const saved = localStorage.getItem('vcal_secret');
-    if (saved) document.getElementById('secretInput').value = saved;
+  init() {
+    this._stored = localStorage.getItem('vcal_theme') || 'dark';
+    this.apply(this._stored);
+    this._syncButtons();
+  },
+
+  apply(mode) {
+    const resolved = mode === 'system'
+      ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+      : mode;
+    document.documentElement.setAttribute('data-theme', resolved);
+    document.getElementById('themeColorMeta').content = resolved === 'light' ? '#F8FAFC' : '#070B14';
+    document.getElementById('iconSun').classList.toggle('hidden', resolved === 'light');
+    document.getElementById('iconMoon').classList.toggle('hidden', resolved === 'dark');
+  },
+
+  set(mode) {
+    this._stored = mode;
+    localStorage.setItem('vcal_theme', mode);
+    this.apply(mode);
+    this._syncButtons();
+  },
+
+  toggle() {
+    const cur = document.documentElement.getAttribute('data-theme');
+    this.set(cur === 'dark' ? 'light' : 'dark');
+  },
+
+  _syncButtons() {
+    document.querySelectorAll('[data-theme-val]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.themeVal === this._stored);
+    });
+  }
+};
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  SETTINGS (localStorage persistence)
+// ═══════════════════════════════════════════════════════════════════
+const S = {
+  get: k  => localStorage.getItem(`vcal_${k}`) || '',
+  set: (k,v) => localStorage.setItem(`vcal_${k}`, v),
+};
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  TOAST NOTIFICATIONS
+// ═══════════════════════════════════════════════════════════════════
+function toast(msg, type = 'info', duration = 3500) {
+  const wrap = document.getElementById('toastWrap');
+  const el   = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span class="toast-dot"></span>${esc(msg)}`;
+  wrap.appendChild(el);
+
+  const remove = () => {
+    el.classList.add('removing');
+    el.addEventListener('animationend', () => el.remove(), { once: true });
+  };
+
+  const timer = setTimeout(remove, duration);
+  el.addEventListener('click', () => { clearTimeout(timer); remove(); });
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════════════════════════════
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+    document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected','true');
+    const panel = document.getElementById(`panel-${btn.dataset.panel}`);
+    panel.classList.remove('hidden');
+    if (btn.dataset.panel === 'history') loadHistory();
+  });
 });
 
-document.getElementById('secretInput').addEventListener('input', () => {
-    const val = document.getElementById('secretInput').value;
-    localStorage.setItem('vcal_secret', val);
-    document.getElementById('lockIcon').textContent = val ? '🔓' : '🔒';
-    document.getElementById('lockIcon').className = 'lock-icon' + (val ? ' unlocked' : '');
-});
 
-// ── Recording ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════
+//  RECORDING
+// ═══════════════════════════════════════════════════════════════════
+let mediaRecorder = null, audioChunks = [], isRecording = false;
+let recordedBlob = null, recordedMime = '';
+
 async function toggleRecord() {
-    isRecording ? stopRecording() : await startRecording();
+  if (navigator.vibrate) navigator.vibrate(10);  // haptic feedback
+  isRecording ? stopRecording() : await startRecording();
 }
 
 async function startRecording() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus'
+               : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
 
-        const mimeType =
-            MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' :
-            MediaRecorder.isTypeSupported('audio/webm')              ? 'audio/webm' : 'audio/mp4';
+    mediaRecorder = new MediaRecorder(stream, { mimeType: mime });
+    audioChunks   = [];
 
-        mediaRecorder = new MediaRecorder(stream, { mimeType });
-        audioChunks   = [];
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+      recordedMime = mime;
+      recordedBlob = new Blob(audioChunks, { type: mime });
+      stream.getTracks().forEach(t => t.stop());
+      setRecUI('ready');
+    };
 
-        mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
-        mediaRecorder.onstop = () => {
-            recordedMime = mimeType;
-            recordedBlob = new Blob(audioChunks, { type: mimeType });
-            stream.getTracks().forEach(t => t.stop());
-            onRecordingReady();
-        };
-
-        mediaRecorder.start(200);
-        isRecording = true;
-        setRecordingUI(true);
-
-    } catch {
-        alert('Microphone access denied.\n\nAllow microphone access in your browser settings, then refresh.');
-    }
+    mediaRecorder.start(200);
+    isRecording = true;
+    setRecUI('recording');
+  } catch {
+    toast('Microphone access denied. Please allow it in browser settings.', 'error');
+  }
 }
 
 function stopRecording() {
-    if (mediaRecorder && isRecording) {
-        mediaRecorder.stop();
-        isRecording = false;
-    }
+  if (mediaRecorder && isRecording) { mediaRecorder.stop(); isRecording = false; }
 }
 
-function setRecordingUI(on) {
-    const card  = document.getElementById('recorderCard');
-    const btn   = document.getElementById('micBtn');
-    const label = document.getElementById('micLabel');
+function setRecUI(state) {
+  const card   = document.getElementById('recorderCard');
+  const btn    = document.getElementById('micBtn');
+  const status = document.getElementById('micStatus');
 
-    card.classList.toggle('recording', on);
-    btn.textContent  = on ? '⏹' : '🎤';
-    label.textContent = on ? 'Recording — tap to stop' : 'Tap to record';
+  card.classList.remove('recording','ready');
+  if (state === 'recording') {
+    card.classList.add('recording');
+    btn.textContent  = '⏹';
+    btn.setAttribute('aria-label', 'Stop recording');
+    status.textContent = 'Recording — tap to stop';
+  } else if (state === 'ready') {
+    card.classList.add('ready');
+    btn.textContent  = '🎤';
+    btn.setAttribute('aria-label', 'Record voice note');
+    status.textContent = '✓ Recording ready';
+    if (navigator.vibrate) navigator.vibrate([10, 50, 10]);
+  } else {
+    btn.textContent  = '🎤';
+    btn.setAttribute('aria-label', 'Record voice note');
+    status.textContent = 'Tap to record';
+  }
 }
 
-function onRecordingReady() {
-    setRecordingUI(false);
-    document.getElementById('micLabel').textContent = '✓ Recording ready';
-    document.getElementById('micLabel').style.color = 'var(--teal-light)';
-    document.getElementById('textInput').value = '';
-}
 
-// ── Submit ────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════
+//  SUBMIT
+// ═══════════════════════════════════════════════════════════════════
 async function handleSubmit() {
-    const text   = document.getElementById('textInput').value.trim();
-    const secret = document.getElementById('secretInput').value.trim();
+  const text   = document.getElementById('textInput').value.trim();
+  const secret = document.getElementById('pwInput').value.trim();
 
-    if (!text && !recordedBlob) {
-        alert('Record a voice note or type a message first.');
-        return;
+  if (!text && !recordedBlob) {
+    toast('Record a voice note or type a message first.', 'info');
+    return;
+  }
+
+  setLoading(true, recordedBlob ? 'Transcribing audio…' : 'Parsing with AI…');
+  clearResults();
+
+  try {
+    const form = new FormData();
+    if (recordedBlob) {
+      const ext = recordedMime.includes('mp4') ? 'm4a' : 'webm';
+      form.append('audio', recordedBlob, `recording.${ext}`);
+      setLoading(true, 'Transcribing, then parsing…');
+    } else {
+      form.append('text', text);
     }
+    form.append('timezone', S.get('timezone') || Intl.DateTimeFormat().resolvedOptions().timeZone);
+    if (secret) form.append('secret', secret);
 
-    setLoading(true);
-    clearResults();
+    const res  = await fetch('/parse', { method: 'POST', body: form });
+    const data = await res.json();
 
-    try {
-        const form = new FormData();
+    if (!res.ok || data.error) throw new Error(data.error || 'Unknown server error');
 
-        if (recordedBlob) {
-            const ext = recordedMime.includes('mp4') ? 'm4a' : 'webm';
-            form.append('audio', recordedBlob, `recording.${ext}`);
-        } else {
-            form.append('text', text);
-        }
+    renderResults(data);
+    if (navigator.vibrate) navigator.vibrate([10, 40, 10, 40, 20]);
 
-        form.append('timezone', Intl.DateTimeFormat().resolvedOptions().timeZone);
-        if (secret) form.append('secret', secret);
+    // Reset
+    recordedBlob = null;
+    document.getElementById('textInput').value = '';
+    setRecUI('idle');
 
-        const res  = await fetch('/parse', { method: 'POST', body: form });
-        const data = await res.json();
-
-        if (!res.ok || data.error) throw new Error(data.error || 'Unknown error');
-
-        renderResults(data);
-
-        // Reset
-        recordedBlob = null;
-        document.getElementById('textInput').value = '';
-        document.getElementById('micLabel').textContent = 'Tap to record';
-        document.getElementById('micLabel').style.color = '';
-
-    } catch (err) {
-        renderError(err.message);
-    } finally {
-        setLoading(false);
-    }
+  } catch (err) {
+    renderError(err.message);
+    toast(err.message, 'error');
+  } finally {
+    setLoading(false);
+  }
 }
 
-// ── Rendering ─────────────────────────────────────────────────────────────
-function setLoading(show) {
-    document.getElementById('loadingEl').classList.toggle('hidden', !show);
-    document.getElementById('submitBtn').disabled = show;
+function setLoading(show, msg = 'Processing…') {
+  const el = document.getElementById('loadingEl');
+  el.classList.toggle('hidden', !show);
+  if (show) document.getElementById('loadingText').textContent = msg;
+  document.getElementById('submitBtn').disabled = show;
 }
 
 function clearResults() {
-    const el = document.getElementById('resultsEl');
-    el.innerHTML = '';
-    el.classList.add('hidden');
+  document.getElementById('resultsEl').innerHTML = '';
 }
 
 function renderResults(data) {
-    const el = document.getElementById('resultsEl');
-    el.classList.remove('hidden');
+  const el = document.getElementById('resultsEl');
+  let html = '';
 
-    let html = '';
+  if (data.transcript) {
+    html += `<div class="transcript-box">"${esc(data.transcript)}"</div><div style="height:8px"></div>`;
+  }
 
-    if (data.transcript) {
-        html += `<div class="transcript-box">"${esc(data.transcript)}"</div>`;
-    }
-
-    if (!data.created || data.created.length === 0) {
-        html += `<div class="card" style="text-align:center;padding:28px;color:var(--text-secondary)">
-                   No events found.<br>
-                   <small style="color:var(--text-muted)">Try including a date or time.</small>
-                 </div>`;
-    } else {
-        html += '<div class="card">';
-        for (const item of data.created) {
-            const isEvent = item.type === 'event';
-            const icon    = isEvent ? '📅' : '📋';
-            const cls     = isEvent ? 'event' : 'task';
-
-            let detail = '';
-            if (isEvent) {
-                if (item.date) detail += item.date;
-                if (item.time) detail += ` · ${item.time}`;
-                if (item.location) detail += ` · ${esc(item.location)}`;
-            } else {
-                detail = item.deadline ? `Due ${item.deadline}` : 'No deadline set';
-            }
-
-            const calBadge = item.calendar
-                ? `<span class="result-calendar">${esc(item.calendar)}</span>` : '';
-
-            html += `
-              <div class="result-item">
-                <div class="result-icon ${cls}">${icon}</div>
-                <div class="result-info">
-                  <div class="result-title">${esc(item.title)}</div>
-                  <div class="result-detail">${detail}</div>
-                </div>
-                ${calBadge}
-              </div>`;
-        }
-        html += '</div>';
-    }
-
-    el.innerHTML = html;
+  if (!data.created?.length) {
+    html += `<div class="empty-state"><span class="empty-icon">🤔</span><p>No events found. Try including a date or time.</p></div>`;
+  } else {
+    const count = data.created.length;
+    toast(`${count} item${count > 1 ? 's' : ''} added to your calendar`, 'success');
+    html += '<div class="card">';
+    data.created.forEach((item, i) => {
+      const isEvent = item.type === 'event';
+      let detail = '';
+      if (isEvent) {
+        if (item.date) detail += item.date;
+        if (item.time) detail += ` · ${item.time}`;
+        if (item.location) detail += ` · ${esc(item.location)}`;
+      } else {
+        detail = item.deadline ? `Due ${item.deadline}` : 'No deadline';
+      }
+      const badge = item.calendar ? `<span class="cal-badge">${esc(item.calendar)}</span>` : '';
+      html += `
+        <div class="result-item" style="animation-delay:${i * 60}ms">
+          <div class="result-icon ${isEvent ? 'event' : 'task'}">${isEvent ? '📅' : '📋'}</div>
+          <div class="result-body">
+            <div class="result-title">${esc(item.title)}</div>
+            <div class="result-meta">${detail}</div>
+          </div>
+          ${badge}
+        </div>`;
+    });
+    html += '</div>';
+  }
+  el.innerHTML = html;
 }
 
 function renderError(msg) {
-    const el = document.getElementById('resultsEl');
-    el.classList.remove('hidden');
-    el.innerHTML = `<div class="error-card">⚠ ${esc(msg)}</div>`;
+  document.getElementById('resultsEl').innerHTML = `<div class="error-card">⚠ ${esc(msg)}</div>`;
 }
 
-function esc(str) {
-    if (!str) return '';
-    return String(str)
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+// ═══════════════════════════════════════════════════════════════════
+//  HISTORY
+// ═══════════════════════════════════════════════════════════════════
+async function loadHistory() {
+  const el = document.getElementById('historyList');
+  const secret = S.get('secret') || document.getElementById('pwInput').value.trim();
+  const params = secret ? `?secret=${encodeURIComponent(secret)}` : '';
+
+  try {
+    const res  = await fetch(`/history${params}`);
+    const rows = await res.json();
+
+    if (!rows.length) {
+      el.innerHTML = `<div class="empty-state"><span class="empty-icon">📭</span><p>No history yet. Create your first event!</p></div>`;
+      return;
+    }
+
+    el.innerHTML = rows.map(row => {
+      const items   = [...(row.events || []), ...(row.tasks || [])];
+      const preview = items.length ? items[0].title : row.input_text;
+      const count   = (row.event_count || 0) + (row.task_count || 0);
+      const ago     = timeAgo(row.created_at);
+      return `
+        <div class="history-item">
+          <div class="history-icon">📅</div>
+          <div class="history-body">
+            <div class="history-input">${esc(preview)}</div>
+            <div class="history-meta">${count} item${count !== 1 ? 's' : ''} added</div>
+            <div class="history-time">${ago}</div>
+          </div>
+        </div>`;
+    }).join('');
+
+  } catch {
+    el.innerHTML = `<div class="error-card">⚠ Could not load history. Check your password.</div>`;
+  }
 }
+
+function timeAgo(isoStr) {
+  const diff = (Date.now() - new Date(isoStr)) / 1000;
+  if (diff < 60)   return 'Just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400)return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  SETTINGS SHEET
+// ═══════════════════════════════════════════════════════════════════
+const overlay = document.getElementById('settingsOverlay');
+const sheet   = document.getElementById('settingsSheet');
+
+function openSettings() {
+  // Populate fields from storage
+  document.getElementById('sPw').value = S.get('secret');
+  document.getElementById('sTz').value = S.get('timezone') || Intl.DateTimeFormat().resolvedOptions().timeZone;
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSettings() {
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('settingsBtn').addEventListener('click', openSettings);
+document.getElementById('closeSettings').addEventListener('click', closeSettings);
+overlay.addEventListener('click', e => { if (e.target === overlay) closeSettings(); });
+
+document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+  S.set('secret', document.getElementById('sPw').value);
+  S.set('timezone', document.getElementById('sTz').value);
+  // Sync password field on main panel
+  document.getElementById('pwInput').value = S.get('secret');
+  closeSettings();
+  toast('Settings saved', 'success');
+});
+
+// Theme segmented control
+document.querySelectorAll('[data-theme-val]').forEach(btn => {
+  btn.addEventListener('click', () => Theme.set(btn.dataset.themeVal));
+});
+
+// Theme toggle button in header
+document.getElementById('themeBtn').addEventListener('click', () => Theme.toggle());
+
+// Mic button
+document.getElementById('micBtn').addEventListener('click', toggleRecord);
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeSettings();
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); handleSubmit(); }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'r')     { e.preventDefault(); toggleRecord(); }
+});
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  PERSIST PASSWORD FIELD
+// ═══════════════════════════════════════════════════════════════════
+document.getElementById('pwInput').addEventListener('input', function() {
+  S.set('secret', this.value);
+  const hasVal = !!this.value;
+  document.getElementById('lockIcon').classList.toggle('open', hasVal);
+});
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  UTILITY
+// ═══════════════════════════════════════════════════════════════════
+function esc(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════════
+(function init() {
+  Theme.init();
+
+  // Restore password
+  const pw = S.get('secret');
+  if (pw) {
+    document.getElementById('pwInput').value = pw;
+    document.getElementById('lockIcon').classList.add('open');
+  }
+
+  // Restore timezone in settings
+  if (!S.get('timezone')) {
+    S.set('timezone', Intl.DateTimeFormat().resolvedOptions().timeZone);
+  }
+
+  // Listen for system theme changes
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (S.get('theme') === 'system') Theme.apply('system');
+  });
+})();
 </script>
 </body>
 </html>
