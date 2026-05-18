@@ -1,227 +1,252 @@
-# Voice Calendar AI
+# 🎙️ Voice Calendar AI
 
-Convert voice notes or text messages into Apple Calendar events — automatically and for free.
+> Speak or type naturally — events appear in your calendar instantly.
+> Works from your phone, your Mac, or Siri. **100% free.**
 
-## Quick Demo
+![Python](https://img.shields.io/badge/Python-3.9+-3776AB?style=flat&logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-3.0-000000?style=flat&logo=flask&logoColor=white)
+![Groq](https://img.shields.io/badge/AI-Groq%20%2B%20Llama%203.3-F55036?style=flat)
+![License](https://img.shields.io/badge/License-MIT-22c55e?style=flat)
+![Cost](https://img.shields.io/badge/Cost-$0-22c55e?style=flat)
 
-```bash
-python main.py --text "Dentist Thursday at 2pm, team standup every Monday 9am, send the report by Friday"
+---
+
+## ✨ What it does
+
+Say this:
+> *"Dentist Thursday at 2pm, team standup every Monday 9am at the office, and remind me to send the report by Friday"*
+
+Get this — automatically, in seconds:
+
 ```
-
-```
-[PARSING] Sending to Groq (llama-3.3-70b-versatile)...
-[VALIDATING] Checking data structure...
-[CALENDAR] Creating 2 event(s) and 1 reminder(s)...
-
-  ✓ Event: 'Dentist' on 2026-05-21 at 14:00
-  ✓ Event: 'Team standup' on 2026-05-18 at 09:00
-  ✓ Reminder: 'Send the report' (due 2026-05-22)
-
-✓ Done! 2 event(s) and 1 reminder(s) created.
+✓ Event:    Dentist          → Thu May 21 · 14:00
+✓ Event:    Team standup     → Mon May 18 · 09:00 · Office
+✓ Reminder: Send the report  → Due Fri May 22
 ```
 
 ---
 
-## How It Works
+## 🏗️ How it works
 
 ```
-[Voice Note] ──→ [Whisper (runs locally, free)] ──┐
-                                                   ▼
-[Text Input] ──────────────────────────────→ [Groq AI] ──→ [Structured JSON]
-                                          (Llama 3.3 70B)
-                                                                      │
-                                                              [Pydantic Validator]
-                                                                      │
-                                             ┌────────────────────────┤
-                                             ▼                        ▼
-                                   [Apple Calendar]        [Apple Reminders]
-                                   (via AppleScript)       (via AppleScript)
-                                             └────────────────────────┘
-                                                          │
-                                                    [SQLite Log]
+📱 iPhone / Mac
+      │
+      ├─ Voice note  ──→  🎙 Groq Whisper API  ──→  transcript
+      └─ Text input  ──────────────────────────────────────┐
+                                                           ▼
+                                                   🤖 Llama 3.3 70B
+                                                   (extracts events)
+                                                           │
+                                                   ✅ Pydantic validator
+                                                           │
+                                         ┌─────────────────┴──────────────────┐
+                                         ▼                                    ▼
+                                  📅 Google Calendar               📋 Google Calendar
+                                    (timed events)                  (tasks / reminders)
+                                         │
+                                  syncs automatically
+                                         │
+                                         ▼
+                                  📱 iPhone Calendar app
 ```
 
 ---
 
-## Cost
+## 🛠️ Tech stack
 
-| Component | Tool | Cost |
+| Layer | Tool | Why |
 |---|---|---|
-| Speech-to-text | Whisper (local) | Free forever |
-| AI parsing | Groq — Llama 3.3 70B | Free (14,400 req/day, no card) |
-| Calendar | AppleScript (built into macOS) | Free |
-| Storage | SQLite (built into Python) | Free |
-
-**Total cost: $0**
-
----
-
-## Requirements
-
-- **macOS** — Apple Calendar integration uses AppleScript, which is Mac-only
-- **Python 3.9+**
-- **Groq API key** — free at [console.groq.com](https://console.groq.com) (no credit card)
+| 🎙️ Speech-to-text | Groq Whisper API | Free, fast, cloud-based |
+| 🤖 AI parsing | Llama 3.3 70B via Groq | Free, understands natural language |
+| ✅ Validation | Pydantic | Catches bad AI output before it breaks things |
+| 📅 Calendar | Google Calendar API | Works from anywhere, syncs to iPhone |
+| 🌐 Web server | Flask + Gunicorn | Simple Python web framework |
+| 🖥️ CLI | Python + AppleScript | Direct Mac terminal use |
+| 💾 Logging | SQLite | Zero-setup local history |
+| ☁️ Hosting | Render (free tier) | Deploys in minutes |
 
 ---
 
-## Setup (step by step)
+## 🚀 Two ways to use it
 
-### Step 1 — Get your free Groq API key
+### 📱 From your phone (web app)
+Open your Render URL in Safari → add to home screen → use like a native app.
+Or set up an Apple Shortcut to trigger it from Siri.
 
-1. Go to [console.groq.com](https://console.groq.com)
-2. Click **Sign Up** — use Google or email (no credit card asked)
-3. Once inside, click **API Keys** in the left sidebar
-4. Click **Create API Key**, name it anything (e.g. `calendar-ai`)
-5. Copy the key — it starts with `gsk_`
-
-### Step 2 — Clone the repo
-
+### 💻 From your Mac (CLI)
 ```bash
-git clone https://github.com/YOUR_USERNAME/voice-calendar-ai.git
-cd voice-calendar-ai
-```
-
-### Step 3 — Create a virtual environment
-
-A virtual environment is an isolated space for this project's packages.
-It prevents conflicts with other Python projects on your computer.
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-> You must run `source venv/bin/activate` every time you open a new terminal.
-> You'll know it's active when you see `(venv)` at the start of your prompt.
-
-### Step 4 — Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-> First run also downloads the Whisper model (~300MB). One-time only.
-
-### Step 5 — Configure your environment
-
-```bash
-cp .env.example .env
-open -e .env
-```
-
-Fill in your `.env` file:
-
-```
-GROQ_API_KEY=gsk_your_actual_key_here
-GROQ_MODEL=llama-3.3-70b-versatile
-WHISPER_MODEL=base
-CALENDAR_NAME=Home
-DB_PATH=data/events.db
-```
-
-> **Finding your calendar name:** Open the Calendar app. In the left sidebar
-> you'll see names like "Home", "Work", "Personal". Copy the exact name — it's case-sensitive.
-
-### Step 6 — Run tests to verify setup
-
-```bash
-pytest -v
-```
-
-All 14 tests should pass. This confirms the code is working before you touch any APIs.
-
-### Step 7 — Try your first real parse
-
-```bash
+# Text
 python main.py --text "Coffee with Sarah next Tuesday at 10am at Blue Bottle"
-```
 
-> **First run only:** macOS will show a permission dialog:
-> *"Terminal wants to control Calendar. Allow?"*
-> Click **Allow**. This is a one-time security prompt.
+# Voice note
+python main.py --audio ~/Downloads/recording.m4a
 
----
-
-## Usage
-
-### Text input
-```bash
-python main.py --text "your message here"
-```
-
-### Voice note
-```bash
-python main.py --audio path/to/recording.m4a
-```
-
-Supported formats: `mp3`, `m4a`, `mp4`, `wav`, `flac`, `ogg`
-
-### View history
-```bash
+# History
 python main.py --history
 ```
 
-### Run tests
-```bash
-pytest -v
-```
-
 ---
 
-## What can you say?
-
-| Input example | What it creates |
-|---|---|
-| `"Dentist Thursday at 2pm"` | Calendar event with date + time |
-| `"Team standup every Monday 9am"` | Recurring weekly event |
-| `"Coffee with Sarah next week at Blue Bottle on Market St"` | Event with location |
-| `"Gym session tomorrow 7am to 8am"` | Event with explicit duration |
-| `"Remind me to send the report by Friday"` | Task with deadline in Reminders |
-| `"Don't forget to call mom"` | Task (no date) in Reminders |
-
----
-
-## Project Structure
+## 📁 Project structure
 
 ```
 voice-calendar-ai/
-├── main.py              ← Run this. Ties everything together.
-├── config.py            ← All settings (reads from .env)
-├── requirements.txt     ← Python packages to install
-├── .env.example         ← Template for your .env file (safe to commit)
-├── .env                 ← Your real secrets (NEVER commit this)
-├── .gitignore           ← Tells Git to ignore .env and data/
+│
+├── 🚀 main.py                 ← CLI entry point (Mac terminal)
+├── 🌐 app.py                  ← Web server (Flask, for phone access)
+├── ⚙️  config.py               ← All settings, reads from .env
+├── 🔐 .env.example            ← Template — copy to .env and fill in
+│
 ├── src/
-│   ├── transcriber.py   ← Audio → text (Whisper, runs locally)
-│   ├── parser.py        ← Text → JSON (Groq AI / Llama 3.3 70B)
-│   ├── validator.py     ← Validates JSON structure (Pydantic)
-│   ├── calendar.py      ← Creates Apple Calendar events (AppleScript)
-│   └── storage.py       ← Logs everything to SQLite
+│   ├── 🎙️  transcriber.py      ← Local Whisper (CLI)
+│   ├── ☁️  transcriber_cloud.py ← Groq Whisper API (web app)
+│   ├── 🤖 parser.py           ← Groq AI → structured JSON
+│   ├── ✅ validator.py         ← Validates AI output (Pydantic)
+│   ├── 📅 calendar.py         ← Apple Calendar via AppleScript (CLI)
+│   ├── 📅 google_calendar.py  ← Google Calendar API (web app)
+│   └── 💾 storage.py          ← SQLite logging
+│
+├── templates/
+│   └── 🎨 index.html          ← Mobile-friendly web UI
+│
 └── tests/
-    └── test_parser.py   ← Unit tests (run with 'pytest')
+    └── 🧪 test_parser.py      ← 14 unit tests
 ```
 
 ---
 
-## Troubleshooting
+## ⚡ Quick start
 
-**"GROQ_API_KEY is missing"**
-- Run `cp .env.example .env` then add your key from [console.groq.com](https://console.groq.com)
+### 1 — Get your free API key
+Sign up at **[console.groq.com](https://console.groq.com)** — no credit card, takes 2 minutes.
 
-**"Calendar not found" or AppleScript error**
-- Open Calendar app, check the exact name in the left sidebar
-- Update `CALENDAR_NAME` in your `.env` to match exactly (case-sensitive)
+### 2 — Clone & install
+```bash
+git clone https://github.com/YOUR_USERNAME/voice-calendar-ai.git
+cd voice-calendar-ai
+python3 -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+```
 
-**"osascript: permission denied"**
-- Go to System Settings → Privacy & Security → Automation
-- Allow Terminal (or your app) to control Calendar and Reminders
+### 3 — Configure
+```bash
+cp .env.example .env
+open -e .env   # add your Groq key and settings
+```
 
-**Whisper takes too long**
-- Change `WHISPER_MODEL=tiny` in your `.env` for faster (slightly less accurate) transcription
+### 4 — Run the CLI
+```bash
+python main.py --text "Team meeting tomorrow at 3pm"
+```
+
+### 5 — Deploy to phone (optional)
+See the [full setup guide](#full-setup-guide) below.
 
 ---
 
-## Upgrade Roadmap
+## 🔧 Full setup guide
 
-- **Phase 2:** Web interface (Flask), retry logic, `--dry-run` flag to preview without creating
-- **Phase 3:** Recurring event AppleScript, Apple Shortcuts trigger from iPhone, conflict detection, fully local AI via Ollama
+<details>
+<summary><b>📱 Phone access via Render + Google Calendar</b></summary>
+
+### Google Calendar setup (one time)
+
+1. Go to **[console.cloud.google.com](https://console.cloud.google.com)**
+2. Create a project → enable **Google Calendar API**
+3. **APIs & Services → Credentials → Create OAuth 2.0 Client ID** (Desktop app)
+4. Download the JSON → rename to `credentials.json` → place in project root
+5. Add your Gmail as a test user: **OAuth consent screen → Test users**
+6. Run the auth script:
+   ```bash
+   python setup_google_auth.py
+   ```
+7. Copy the three printed values into your `.env`
+8. Delete `credentials.json`
+
+### Deploy to Render
+
+1. Push to GitHub: `git push`
+2. Sign up at **[render.com](https://render.com)** → **New → Web Service** → connect your repo
+3. Settings:
+   - Build: `pip install -r requirements.txt`
+   - Start: `gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120 --workers 1`
+4. Add all environment variables from your `.env`
+5. Deploy → visit your URL on iPhone → **Share → Add to Home Screen**
+
+### Keep it awake (free)
+Sign up at **[cron-job.org](https://cron-job.org)** and ping your Render URL every 5 minutes.
+Or use the included GitHub Actions workflow — just add `RENDER_URL` as a repo secret.
+
+</details>
+
+<details>
+<summary><b>⚙️ Environment variables</b></summary>
+
+| Variable | Required | Description |
+|---|---|---|
+| `GROQ_API_KEY` | ✅ Always | From console.groq.com |
+| `GROQ_MODEL` | ✅ Always | Default: `llama-3.3-70b-versatile` |
+| `APP_SECRET` | 🌐 Web only | Password to protect your web app |
+| `TIMEZONE` | 🌐 Web only | e.g. `Europe/Madrid`, `America/New_York` |
+| `GOOGLE_CLIENT_ID` | 🌐 Web only | From Google Cloud Console |
+| `GOOGLE_CLIENT_SECRET` | 🌐 Web only | From Google Cloud Console |
+| `GOOGLE_REFRESH_TOKEN` | 🌐 Web only | From `setup_google_auth.py` |
+| `CALENDAR_NAME` | 💻 CLI only | Your Apple Calendar name |
+| `WHISPER_MODEL` | 💻 CLI only | `tiny` / `base` / `small` (default: `base`) |
+
+</details>
+
+<details>
+<summary><b>🍎 Apple Shortcuts integration</b></summary>
+
+Create a shortcut with these actions:
+
+1. **Ask for Input** — Text — *"What's the event?"*
+2. **Get Contents of URL**
+   - URL: `https://your-app.onrender.com/parse`
+   - Method: `POST`
+   - Body: `Form`
+   - Fields: `text` = Provided Input · `secret` = your password · `timezone` = `Europe/Madrid`
+3. **Get Dictionary from** Contents of URL
+4. **Get Value for** `created` in Dictionary
+5. **Show Notification** — title: *"Calendar updated ✓"*
+
+Add to Siri with a phrase like *"Add to calendar"* — then just say it.
+
+</details>
+
+---
+
+## 💡 What it understands
+
+| You say | What gets created |
+|---|---|
+| *"Dentist Thursday at 2pm"* | 📅 Event with date & time |
+| *"Team standup every Monday 9am"* | 📅 Recurring event |
+| *"Coffee with Sarah at Blue Bottle on Market St"* | 📅 Event with location |
+| *"Gym tomorrow 7am to 8am"* | 📅 Event with duration |
+| *"Remind me to send the report by Friday"* | 📋 Task with deadline |
+| *"Don't forget to call mom"* | 📋 Task (no date) |
+
+---
+
+## 🧪 Tests
+
+```bash
+pytest -v   # runs 14 unit tests
+```
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Multi-user support with Google login
+- [ ] Native iOS app with on-device AI (no API costs)
+- [ ] Recurring event full support
+- [ ] Conflict detection
+
+---
+
+## 📄 License
+
+MIT — do whatever you want with it.
